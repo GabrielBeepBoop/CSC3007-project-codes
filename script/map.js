@@ -1,229 +1,102 @@
-// Variables
 var width = 3000;
 var height = 1250;
-var GeoURL = "https://raw.githubusercontent.com/andybarefoot/andybarefoot-www/master/maps/mapdata/custom50.json";
+var GeoURL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
+var popCSV = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world_population.csv"
 
-var minZoom;
-var maxZoom;
 
-// Define map projection
-var projection = d3
-.geoEquirectangular()
-.center([0, 15]) // set centre to further North as we are cropping more off bottom of map
-.scale([width / (2 * Math.PI)]) // scale to fit group width
-.translate([width / 2, height / 2]); // ensure centred in group
 
-// Define map path
-var path = d3
-.geoPath()
-.projection(projection);
+let svg = d3.select("svg").attr("viewBox", "0 0 " + width + " " + height)
 
-// Create function to apply zoom to countriesGroup
-function zoomed() {
-    t = d3
-    .event
-    .transform;
-    
-    countriesGroup
-    .attr("transform","translate(" + [t.x, t.y] + ")scale(" + t.k + ")");
-}
+// Map and projection
+const path = d3.geoPath();
+const projection = d3.geoMercator()
+  .scale(250)
+  .center([0,20])
+  .translate([width / 2, height / 2]);
 
-// Define map zoom behaviour
-var zoom = d3
-.zoom()
-.on("zoom", zoomed);
+// Data and color scale
+const data = new Map();
+const colorScale = d3.scaleThreshold()
+  .domain([100000, 1000000, 10000000, 30000000, 100000000, 500000000])
+  .range(d3.schemeBlues[7]);
 
-// Display tooltip      
-function getTextBox(selection) {
-    selection
-    .each(function(d) {
-        d.bbox = this.getBBox();
-    });
-}
+// Load external data and boot
+Promise.all([
+d3.json(GeoURL),
+d3.csv(popCSV, function(d) {
+    data.set(d.code, +d.pop)
+})]).then(function(loadData){
+    let topo = loadData[0]
 
-// Function that calculates zoom/pan limits and sets zoom to default value 
-function initiateZoom() {
-    // Define a "minzoom" whereby the "Countries" is as small possible without leaving white space at top/bottom or sides
-    minZoom = Math.max($("#map-holder").width() / width, $("#map-holder").height() / height);
-    // set max zoom to a suitable factor of this value
-    maxZoom = 20 * minZoom;
-    // set extent of zoom to chosen values
-    // set translate extent so that panning can't cause map to move out of viewport
-    zoom
-    .scaleExtent([minZoom, maxZoom])
-    .translateExtent([[0, 0], [width, height]]);
-        
-    // define X and Y offset for centre of map to be shown in centre of holder
-    midX = ($("#map-holder").width() - minZoom * width) / 2;
-    midY = ($("#map-holder").height() - minZoom * height) / 2;
-    
-    // change zoom transform to min zoom and centre offsets
-    svg.call(zoom.transform, d3.zoomIdentity.translate(midX, midY).scale(minZoom));
-}
+     //Add tooltip
+     var tooltip = d3.select("body")
+     .append("div")
+     .attr('class', 'd3-tooltip')
+     .style('position', 'absolute')
+     .style('visibility', 'hidden')
+     .style('padding', '10px')
+     .style('border-radius', '10px')
+     .style('color', 'white')
+     .style('background', 'rgba(0,0,0,0.8)')
+     .style('pointer-events', 'none')
 
-// zoom to show a bounding box, with optional additional padding as percentage of box size
-function boxZoom(box, centroid, paddingPerc) {
-    minXY = box[0];
-    maxXY = box[1];
-    // find size of map area defined
-    zoomWidth = Math.abs(minXY[0] - maxXY[0]);
-    zoomHeight = Math.abs(minXY[1] - maxXY[1]);
-    
-    // find midpoint of map area defined
-    zoomMidX = centroid[0];
-    zoomMidY = centroid[1];
-        
-    // increase map area to include padding
-    zoomWidth = zoomWidth * (1 + paddingPerc / 100);
-    zoomHeight = zoomHeight * (1 + paddingPerc / 100);
-        
-    // find scale required for area to fill svg
-    maxXscale = $("svg").width() / zoomWidth;
-    maxYscale = $("svg").height() / zoomHeight;
-    zoomScale = Math.min(maxXscale, maxYscale);
-    
-    // Handling Edge cases
-    // limit to max zoom (handles tiny countries)
-    zoomScale = Math.min(zoomScale, maxZoom);
-    
-    // limit to min zoom (handles large countries and countries that span the date line)
-    zoomScale = Math.max(zoomScale, minZoom);
-    // Find screen pixel equivalent once scaled
-    offsetX = zoomScale * zoomMidX;
-    offsetY = zoomScale * zoomMidY;
-    // Find offset to centre, making sure no gap at left or top of holder
-    dleft = Math.min(0, $("svg").width() / 2 - offsetX);
-    dtop = Math.min(0, $("svg").height() / 2 - offsetY);
-    // Make sure no gap at bottom or right of holder
-    dleft = Math.max($("svg").width() - w * zoomScale, dleft);
-    dtop = Math.max($("svg").height() - h * zoomScale, dtop);
-    
-    // set zoom
-    svg
-    .transition()
-    .duration(500)
-    .call(zoom.transform,
-        d3.zoomIdentity.translate(dleft, dtop).scale(zoomScale)
-        );
+    let mouseOver = function(event, d) {
+    d3.selectAll(".Country")
+      .transition()
+      .duration(200)
+      .style("opacity", .5)
+    d3.select(this)
+      .transition()
+      .duration(200)
+      .style("opacity", 1)
+      .style("stroke", "black")
+    tooltip
+        .html(d.properties.name)
+        .style('visibility', 'visible')
     }
-    
-    // On window resize
-    $(window).resize(function() {
-        // Resize SVG
-        svg
-        .attr("width", $("#map-holder").width())
-        .attr("height", $("#map-holder").height());
-        initiateZoom();
-      });
 
-      // create an SVG
-      var svg = d3
-        .select("#map-holder")
-        .append("svg")
-        // set to the same size as the "map-holder" div
-        .attr("width", $("#map-holder").width())
-        .attr("height", $("#map-holder").height())
-        // add zoom functionality
-        .call(zoom)
-      ;
+    let mouseMove = function(event, d) {
+    tooltip
+        .style('left', event.pageX + 'px')
+        .style('top', event.pageY + 'px')
+    }
 
+  let mouseLeave = function(event, d) {
+    d3.selectAll(".Country")
+      .transition()
+      .duration(200)
+      .style("opacity", .8)
+    d3.select(this)
+      .transition()
+      .duration(200)
+      .style("stroke", "transparent")
+    tooltip
+      .style('visibility', 'hidden')
+  }
 
-      // get map data
-      d3.json(GeoURL,function(json) {
-        //Bind data and create one path per GeoJSON feature
-        countriesGroup = svg.append("g").attr("id", "map");
-        // add a background rectangle
-        
-        countriesGroup
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", width)
-        .attr("height", height);
-        
-        // draw a path for each feature/country
-        countries = countriesGroup
-        .selectAll("path")
-        .data(json.features)
-        .enter()
-        .append("path")
-        .attr("d", path)
-        .attr("id", function(d, i) {
-            return "country" + d.properties.iso_a3;
-            })
-        .attr("class", "country")
+  // Draw the map
+  svg.append("g")
+    .selectAll("path")
+    .data(topo.features)
+    .enter()
+    .append("path")
+      // draw each country
+      .attr("d", d3.geoPath()
+        .projection(projection)
+      )
+      // set the color of each country
+      .attr("fill", function (d) {
+        d.total = data.get(d.id) || 0;
+        return colorScale(d.total);
+      }) 
+      .attr("ID", function (d) {
+        return d.properties.name;
+      }) 
+      .style("stroke", "transparent")
+      .attr("class", function(d){ return "Country" } )
+      .style("opacity", .8)
+      .on("mouseover", mouseOver )
+      .on("mousemove", mouseMove )
+      .on("mouseleave", mouseLeave )
 
-        // add a mouseover action to show name label for feature/country
-        .on("mouseover", function(d, i) {
-            d3.select("#countryLabel" + d.properties.iso_a3).style("display", "block");
-            })
-        .on("mouseout", function(d, i) {
-            d3.select("#countryLabel" + d.properties.iso_a3).style("display", "none");
-            })
-        
-        // add an onclick action to zoom into clicked country
-        .on("click", function(d, i) {
-            d3.selectAll(".country").classed("country-on", false);
-            d3.select(this).classed("country-on", true);
-            boxZoom(path.bounds(d), path.centroid(d), 20);
-        });
-        
-        // Add a label group to each feature/country. This will contain the country name and a background rectangle
-        // Use CSS to have class "countryLabel" initially hidden
-        countryLabels = countriesGroup
-        .selectAll("g")
-        .data(json.features)
-        .enter()
-        .append("g")
-        .attr("class", "countryLabel")
-        .attr("id", function(d) {
-            return "countryLabel" + d.properties.iso_a3;
-        })
-        .attr("transform", function(d) {
-        return(
-            "translate(" + path.centroid(d)[0] + "," + path.centroid(d)[1] + ")"
-            );
-        })
-        
-        // add mouseover functionality to the label
-        .on("mouseover", function(d, i) {
-            d3.select(this).style("display", "block");
-        })
-        .on("mouseout", function(d, i) {
-            d3.select(this).style("display", "none");
-        })
-        
-        // add an onlcick action to zoom into clicked country
-        .on("click", function(d, i) {
-            d3.selectAll(".country").classed("country-on", false);
-            d3.select("#country" + d.properties.iso_a3).classed("country-on", true);
-            boxZoom(path.bounds(d), path.centroid(d), 20);
-        });
-        // add the text to the label group showing country name
-        
-        countryLabels
-        .append("text")
-        .attr("class", "countryName")
-        .style("text-anchor", "middle")
-        .attr("dx", 0)
-        .attr("dy", 0)
-        .text(function(d) {
-            return d.properties.name;
-        })
-        .call(getTextBox);
-        // add a background rectangle the same size as the text
-        countryLabels
-        .insert("rect", "text")
-        .attr("class", "countryLabelBg")
-        .attr("transform", function(d) {
-            return "translate(" + (d.bbox.x - 2) + "," + d.bbox.y + ")";
-        })
-        .attr("width", function(d) {
-            return d.bbox.width + 4;
-        })
-        .attr("height", function(d) {
-            return d.bbox.height;
-        });
-        initiateZoom();
-        }
-      );
+})
