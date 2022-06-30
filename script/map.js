@@ -16,16 +16,9 @@ const projection = d3.geoMercator()
 
 // Data and color scale
 const data = new Map();
-const colorScale = d3.scaleThreshold()
-  .domain([100000, 1000000, 10000000, 30000000, 100000000, 500000000])
-  .range(d3.schemeBlues[7]);
 
 // Load external data and boot
-Promise.all([
-d3.json(GeoURL),
-d3.csv(popCSV, function(d) {
-    data.set(d.code, +d.pop)
-})]).then(function(loadData){
+Promise.all([d3.json(GeoURL)]).then(function(loadData){
     let topo = loadData[0]
 
      //Add tooltip
@@ -85,10 +78,7 @@ d3.csv(popCSV, function(d) {
         .projection(projection)
       )
       // set the color of each country
-      .attr("fill", function (d) {
-        d.total = data.get(d.id) || 0;
-        return colorScale(d.total);
-      }) 
+      .attr("fill", "Green") 
       .attr("ID", function (d) {
         return d.properties.name;
       }) 
