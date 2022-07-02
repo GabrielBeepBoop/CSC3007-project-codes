@@ -251,6 +251,65 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
 
   gHorizontal.call(sliderHorizontal);
 
+  //Legends
+   var data = []
+
+  for (var i =0; i <= 10; i++)
+  {
+    data.push({"color": d3.interpolateTurbo( parseFloat(i)/ 10),"value": parseFloat(i)/10});
+  }
+    
+  var extent = d3.extent(data, d => d.value);
+  var padding = 100;
+  var barWidth = 40;
+  var innerHeight = height - (padding * 5);
+
+  var yScale = d3.scaleLinear()
+      .range([innerHeight, 0])
+      .domain(extent);
+
+  // Ticks and axis for y axis
+  var yTicks = data.map(d => d.value);
+  var yAxis = d3.axisRight(yScale)
+      .tickSize(barWidth * 2)
+      .tickValues(yTicks);
+
+  // Create the group to hold the legend
+  var g = svg.append("g").attr("transform", "translate(" + padding + "," + 200 + ")");
+
+  // Title for legends
+  g.append("text")
+      .style("fill", "#000000")
+      .attr("x",  -50)
+      .attr("y",  -30)
+      .attr("font-size", "50px")
+      .text("Mortality Rate");  
+
+  var defs = svg.append("defs");
+  var linearGradient = defs.append("linearGradient").attr("id", "myGradient")
+  .attr('x1', '0%')
+  .attr('x2', '0%')
+  .attr('y1', '100%') // For vertical gradient
+  .attr('y2', '0%');
+
+  // Set the color for each stop
+  linearGradient.selectAll("stop")
+      .data(data)
+    .enter().append("stop")
+      .attr("offset", d => ((d.value - extent[0]) / (extent[1] - extent[0]) * 100) + "%")
+      .attr("stop-color", d => d.color);
+
+  // Overlay the gradient within the recentagle
+  g.append("rect")
+      .attr("width", barWidth)
+      .attr("height", innerHeight)
+      .style("fill", "url(#myGradient)");
+
+  g.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+    .select(".domain").remove();
+
 })
 
 // Initalize the zoom
