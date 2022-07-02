@@ -28,9 +28,9 @@
         <!--Ys change the text here-->
         <h5 class="text-center px-3 py-3" id="caseInfoText">Country info</h5>
          <!--Insert scroller here-->
-         <div class="text-center">
-          Insert scroller here
-        </div>
+         <div id="slider-horizontal"></div>
+
+
         <table class="table small">
           <tbody>
             <tr>
@@ -46,12 +46,12 @@
               <td id="covidDeath"></td>
             </tr>
             <tr>
-              <td style="width:40%">Random Text</td>
-              <td id="Test"></td>
+              <td style="width:40%">Total Population</td>
+              <td id="totalPopulation"></td>
             </tr>
             <tr>
-              <td style="width:40%">Random Text</td>
-              <td id="Test#1"></td>
+              <td style="width:40%">Total Vaccinations</td>
+              <td id="totalVaccination"></td>
             </tr>
           </tbody>
         </table>
@@ -73,6 +73,8 @@
 
 <!--JS-->
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/d3-simple-slider"></script> <!-- Slider -->
+<script type="module" src="https://cdn.skypack.dev/d3-scale-chromatic@3"></script> <!-- Color -->
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script type="text/javascript" src="script/map.js"></script>
 
