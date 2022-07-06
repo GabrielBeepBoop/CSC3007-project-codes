@@ -33,6 +33,12 @@ div.tooltip {
   position: absolute;
 }
 
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+
 .y.axis text {
   font-size: 35px;
-  }
+}

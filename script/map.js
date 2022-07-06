@@ -1,6 +1,7 @@
 var width = 2400;
 var height = 1900;
 var GeoURL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
+//var csvPath = "./data/owid-covid-data_processed.csv" // path to csv containing the COVID-19 data
 var csvPath = "https://raw.githubusercontent.com/GabrielBeepBoop/Covid-dataset/main/owid-covid-data_processed.csv" // path to csv containing the COVID-19 data
 
 let currentYear = 0; // Store current year
@@ -32,35 +33,35 @@ function initZoom() {
 }
 
 // Update the country heatmap intensity based on the givenYear
-function updateHeatMapByYear(val , data){
+function updateHeatMapByYear(val, data) {
   let objectByYear = data[val];
-  for (const index in objectByYear){
-    let element =  objectByYear[index];
-    d3.select("path#" + element["location"]).attr("fill",  d3.interpolateTurbo(element["intensity_score"]));
+  for (const index in objectByYear) {
+    let element = objectByYear[index];
+    d3.select("path#" + element["location"]).attr("fill", d3.interpolateTurbo(element["intensity_score"]));
   }
 }
 // Normalize the intensity score for a Year for each country between a given range from normalizedMin to normalizedMax (e.g 0 to 100)
-function normalizeIntensityScoreByYear(data, year, normalizedMin, normalizedMax){
-    
-    let intensityScoreArray = data[year].map(a => a.intensity_score);
-    let minEntry = Math.min(...intensityScoreArray);
-    let maxEntry = Math.max(...intensityScoreArray);
-    for (const index in  data[year]){
-      let currentScore = data[year][index]["intensity_score"];
-      let mx  = ((currentScore - minEntry) / (maxEntry - minEntry));
-      let preshiftNormalized = mx*(normalizedMax-normalizedMin);
-      data[year][index]["intensity_score"] = preshiftNormalized + normalizedMin;
-    }
+function normalizeIntensityScoreByYear(data, year, normalizedMin, normalizedMax) {
 
-    return data;
+  let intensityScoreArray = data[year].map(a => a.intensity_score);
+  let minEntry = Math.min(...intensityScoreArray);
+  let maxEntry = Math.max(...intensityScoreArray);
+  for (const index in data[year]) {
+    let currentScore = data[year][index]["intensity_score"];
+    let mx = ((currentScore - minEntry) / (maxEntry - minEntry));
+    let preshiftNormalized = mx * (normalizedMax - normalizedMin);
+    data[year][index]["intensity_score"] = preshiftNormalized + normalizedMin;
+  }
+
+  return data;
 }
 
 // Update Country info table
-function updateCountryTableProperty(data ,nameOfCountry, year){
+function updateCountryTableProperty(data, nameOfCountry, year) {
   // Check if the country exists in the csv
-  const found = data[year].some(el => el.location ===nameOfCountry);
+  const found = data[year].some(el => el.location === nameOfCountry);
 
-  if (found){      
+  if (found) {
     // Retrieve elemnt by country
     let element = data[year].find(obj => {
       return obj.location == nameOfCountry;
@@ -73,7 +74,7 @@ function updateCountryTableProperty(data ,nameOfCountry, year){
     d3.select("#covidDeath").text(Number(element["total_death"]).toLocaleString());
     d3.select("#totalPopulation").text(Number(element["poulation"]).toLocaleString());
     d3.select("#totalVaccination").text(Number(element["total_vaccinations"]).toLocaleString());
-  }else{
+  } else {
     // Update statistics for that chosen country
     d3.select("#country").text(nameOfCountry);
     d3.select("#year").text(year);
@@ -86,13 +87,13 @@ function updateCountryTableProperty(data ,nameOfCountry, year){
 }
 
 // Load external data and boot
-Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
+Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
   let topo = loadData[0]
   let csvData = loadData[1];
 
   // Preprocess data
   csvData.forEach(e => {
-    e["date"]=  new Date(e["date"]);
+    e["date"] = new Date(e["date"]);
   });
 
   // Get the distinct years from the COVID-19 dataset
@@ -100,7 +101,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
 
   // An object that stores the data needed for the heat map
   let dataForHeatMap = {}
-  for (const j in yearResults){
+  for (const j in yearResults) {
     dataForHeatMap[yearResults[j]] = []
   }
 
@@ -108,40 +109,44 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
   currentYear = yearResults[0];
 
   // Get the countries with no duplicates
-  let countriesArray = [...new Set(csvData.map(function(item) { return item["location"]; }))];
+  let countriesArray = [...new Set(csvData.map(function (item) { return item["location"]; }))];
 
-   for (const i in countriesArray){
+  for (const i in countriesArray) {
 
-    for (const j in yearResults){
-        let year = yearResults[j]
-  
-        // Filter by countries and year
-        singleCountryData = csvData.filter(obj => obj.location == countriesArray[i]) ;
-        singleCountryData = singleCountryData.filter(obj => obj.date.getFullYear() == year );
+    for (const j in yearResults) {
+      let year = yearResults[j]
 
-        if (Object.keys(singleCountryData).length != 0){
-      
-          // Get the object that has the latest date from that year
-          element =  singleCountryData.reduce((a, b) => (a["date"] > b["date"] ? a : b));
-          
-          // Compute the intensity score (mortality rate)
-          intensityScore =  element["total_deaths"] / element["population"];
-          if (isNaN(intensityScore) ){
-            intensityScore = 0;
-          }
-      
-          // Insert location, intensity score, total deaths, population, total vaccinations into the dataForHeatMap
-          dataForHeatMap[year].push({ "location": element["location"], "intensity_score": intensityScore,
-           "poulation":element["population"], "total_death": element["total_deaths"], "total_vaccinations": element["total_vaccinations"]});
+      // Filter by countries and year
+      singleCountryData = csvData.filter(obj => obj.location == countriesArray[i]);
+      singleCountryData = singleCountryData.filter(obj => obj.date.getFullYear() == year);
 
-        } else{
+      if (Object.keys(singleCountryData).length != 0) {
 
-         // Insert location, intensity score, total deaths, population, total vaccinations into the dataForHeatMap
-          dataForHeatMap[year].push({ "location": element["location"], "intensity_score": 0,
-          "poulation": 0, "total_death": 0, "total_vaccinations": 0}
-         );
+        // Get the object that has the latest date from that year
+        element = singleCountryData.reduce((a, b) => (a["date"] > b["date"] ? a : b));
+
+        // Compute the intensity score (mortality rate)
+        intensityScore = element["total_deaths"] / element["population"];
+        if (isNaN(intensityScore)) {
+          intensityScore = 0;
         }
+
+        // Insert location, intensity score, total deaths, population, total vaccinations into the dataForHeatMap
+        dataForHeatMap[year].push({
+          "location": element["location"], "intensity_score": intensityScore,
+          "poulation": element["population"], "total_death": element["total_deaths"], "total_vaccinations": element["total_vaccinations"]
+        });
+
+      } else {
+
+        // Insert location, intensity score, total deaths, population, total vaccinations into the dataForHeatMap
+        dataForHeatMap[year].push({
+          "location": element["location"], "intensity_score": 0,
+          "poulation": 0, "total_death": 0, "total_vaccinations": 0
+        }
+        );
       }
+    }
   }
 
   // Add tooltip
@@ -170,8 +175,9 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
     tooltip
       .html("<strong>Country:</strong> <span >" + d.properties.name)
       .style('visibility', 'visible')
-      currentCountry = d.properties.name;
-      updateCountryTableProperty(dataForHeatMap, currentCountry, currentYear);
+    currentCountry = d.properties.name;
+    updateCountryTableProperty(dataForHeatMap, currentCountry, currentYear);
+    drawCountryChart(currentCountry)
   }
 
   // When the mouse moves over the country
@@ -183,6 +189,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
 
   // When the mouse is not over the country
   let mouseLeave = function (event, d) {
+    d3.select("#chart").remove();
     d3.selectAll(".Country")
       .transition()
       .duration(200)
@@ -196,7 +203,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
   }
 
   // Draw the map
-   svg.append("g")
+  svg.append("g")
     .selectAll("path")
     .data(topo.features)
     .enter()
@@ -228,17 +235,17 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
   var sliderHorizontal = d3
     .sliderBottom()
     .min(d3.min(yearResults))
-    .max(d3.max(yearResults)) 
-    .width(100 )
+    .max(d3.max(yearResults))
+    .width(100)
     .step(1)
-    .tickFormat(d3.format(""))  
+    .tickFormat(d3.format(""))
     .ticks(2)
     .on('onchange', val => {
-        // update heat map here
-        currentYear = val;
-        dataForHeatMap = normalizeIntensityScoreByYear(dataForHeatMap, val, 0, 1);
-        updateHeatMapByYear(val, dataForHeatMap);
-        updateCountryTableProperty(dataForHeatMap, currentCountry, currentYear);
+      // update heat map here
+      currentYear = val;
+      dataForHeatMap = normalizeIntensityScoreByYear(dataForHeatMap, val, 0, 1);
+      updateHeatMapByYear(val, dataForHeatMap);
+      updateCountryTableProperty(dataForHeatMap, currentCountry, currentYear);
     });
 
   var gHorizontal = d3
@@ -252,66 +259,167 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
   gHorizontal.call(sliderHorizontal);
 
   //Legends
-   var data = [];
+  var data = [];
 
-  for (var i =0; i <= 10; i++)
-  {
-    data.push({"color": d3.interpolateTurbo( parseFloat(i)/ 10),"value": parseFloat(i)/10});
+  for (var i = 0; i <= 10; i++) {
+    data.push({ "color": d3.interpolateTurbo(parseFloat(i) / 10), "value": parseFloat(i) / 10 });
   }
   const rangeMultiplier = 100;
-    
-  var extent = d3.extent(data, d =>  parseFloat(d.value) * rangeMultiplier);
+
+  var extent = d3.extent(data, d => parseFloat(d.value) * rangeMultiplier);
   var padding = 100;
   var barWidth = 40;
   var innerHeight = height - (padding * 5);
 
   var yScale = d3.scaleLinear()
-      .range([innerHeight, 0])
-      .domain(extent);
+    .range([innerHeight, 0])
+    .domain(extent);
 
   // Ticks and axis for y axis
   var yTicks = data.map(d => parseFloat(d.value) * rangeMultiplier);
   var yAxis = d3.axisRight(yScale)
-      .tickSize(barWidth * 2)
-      .tickValues(yTicks)
-      .tickFormat(d => d + "%");
+    .tickSize(barWidth * 2)
+    .tickValues(yTicks)
+    .tickFormat(d => d + "%");
 
   // Create the group to hold the legend
   var g = svg.append("g").attr("transform", "translate(" + padding + "," + 200 + ")");
 
   // Title for legends
   g.append("text")
-      .style("fill", "#000000")
-      .attr("x",  -50)
-      .attr("y",  -30)
-      .attr("font-size", "50px")
-      .text("Mortality Rate");  
+    .style("fill", "#000000")
+    .attr("x", -50)
+    .attr("y", -30)
+    .attr("font-size", "50px")
+    .text("Mortality Rate");
 
   var defs = svg.append("defs");
   var linearGradient = defs.append("linearGradient").attr("id", "myGradient")
-  .attr('x1', '0%')
-  .attr('x2', '0%')
-  .attr('y1', '100%') // For vertical gradient
-  .attr('y2', '0%');
+    .attr('x1', '0%')
+    .attr('x2', '0%')
+    .attr('y1', '100%') // For vertical gradient
+    .attr('y2', '0%');
 
   // Set the color for each stop
   linearGradient.selectAll("stop")
-      .data(data)
+    .data(data)
     .enter().append("stop")
-      .attr("offset", d => ((d.value  * rangeMultiplier - extent[0]) / (extent[1] - extent[0]) * 100) + "%")
-      .attr("stop-color", d => d.color);
+    .attr("offset", d => ((d.value * rangeMultiplier - extent[0]) / (extent[1] - extent[0]) * 100) + "%")
+    .attr("stop-color", d => d.color);
 
   // Overlay the gradient within the recentagle
   g.append("rect")
-      .attr("width", barWidth)
-      .attr("height", innerHeight)
-      .style("fill", "url(#myGradient)");
+    .attr("width", barWidth)
+    .attr("height", innerHeight)
+    .style("fill", "url(#myGradient)");
 
   g.append("g")
     .attr("class", "y axis")
     .call(yAxis)
     .select(".domain").remove();
 
+  //Function to draw country chart
+  function drawCountryChart(selectedCountry) {
+    let country = new Set()
+    let countryData = []
+    let date = ""
+    let deaths = ""
+    let deathData = []
+    // parse the date / time
+    var parseTime = d3.timeParse("%Y-%m-%d");
+    var formatTime = d3.timeFormat("%Y-%m-%d");
+
+    //Obtain all data for the selected country
+    for (var i = 0; i < csvData.length; i++) {
+      country.add(csvData[i]["location"])
+      if (csvData[i]["location"] == selectedCountry) {
+        countryData.push(csvData[i])
+      }
+    }
+
+    //Map deaths data to each date
+    for (var i = 0; i < countryData.length; i++) {
+      date = formatTime(countryData[i]["date"])
+      deaths = countryData[i]["new_deaths"]
+      deathData.push({ "date": date, "deaths": +deaths })
+    }
+    //console.log(deathData)
+
+    //Dimensions for the chart
+    let margin = { top: 20, right: 20, bottom: 40, left: 40 },
+      width = 1200 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+    //Add country chart
+    let countryChart = d3.select("#countryChart")
+      .append("g")
+      .attr("id", "chart")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+    //Set ranges
+    var x = d3.scaleTime().range([0, width]);
+    var y = d3.scaleLinear().range([height, 0]);
+
+    //Define line
+    var line = d3.line()
+      .x(function (d) { return x(d.date); })
+      .y(function (d) { return y(d.deaths); })
+
+    //Append tooltip
+    var div = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+    //Format the data
+    deathData.forEach(function (d) {
+      d.date = parseTime(d.date);
+      d.deaths = +d.deaths;
+    });
+
+    // Scale the range of the data
+    x.domain(d3.extent(deathData, function (d) { return d.date; }));
+    y.domain([0, d3.max(deathData, function (d) { return d.deaths; })]);
+
+    // Add the path.
+    countryChart.append("path")
+      .data([deathData])
+      .attr("class", "line")
+      .attr("d", line);
+
+    //Add x-axis for year chart
+    countryChart.append("g")
+      .attr("class", "axis axis-x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x))
+      .selectAll("text")
+      .attr("transform", "rotate(-45)")
+      .style("text-anchor", "end");
+    //Add y-axis for year chart
+    countryChart.append("g")
+      .attr("class", "axis axis-y")
+      .call(d3.axisLeft(y).ticks(10))
+
+    //Add dots with tooltips
+    countryChart.selectAll("dot")
+      .data(deathData)
+      .enter().append("circle")
+      .attr("r", 5)
+      .attr("cx", function (d) { return x(d.date); })
+      .attr("cy", function (d) { return y(d.deaths); })
+      .on("mouseover", function (event, d) {
+        div.transition()
+          .duration(200)
+          .style("opacity", .9);
+        div.html("Date: " + formatTime(d.date) + "<br/>Deaths: " + d.deaths)
+          .style("left", (event.pageX) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", function (d) {
+        div.transition()
+          .duration(500)
+          .style("opacity", 0);
+      });
+  }
 })
 
 // Initalize the zoom
