@@ -6,6 +6,7 @@ var csvPath = "https://raw.githubusercontent.com/GabrielBeepBoop/Covid-dataset/m
 
 let currentYear = 0; // Store current year
 let currentCountry = "" // Current country selected by the mouse hover
+let isLock = false // To lock the selected region when left mouse button is clicked
 
 let svg = d3.select("svg").attr("viewBox", "0 0 " + width + " " + height)
 
@@ -200,6 +201,36 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       .style("stroke", "transparent")
     tooltip
       .style('visibility', 'hidden')
+      currentCountry = "";
+  }
+
+  let mouseClick = function (event, d) {
+    isLock = !isLock
+    if (isLock == true){
+      
+      //Remove mouse events
+      d3.selectAll("path").on("mouseover", null); 
+      d3.selectAll("path").on("mousemove", null); 
+      d3.selectAll("path").on("mouseleave", null); 
+      tooltip
+      .style('visibility', 'hidden')
+
+      //Apply styling
+      d3.select(this)
+      .style("stroke-width", "3px")
+      .style("opacity", 1);
+
+    } else{
+      // Add back the mouse events
+      d3.selectAll("path").on("mouseover", mouseOver); 
+      d3.selectAll("path").on("mousemove", mouseMove); 
+      d3.selectAll("path").on("mouseleave", mouseLeave); 
+
+      //Remove styling
+      d3.select(event.currentTarget)
+      .style("mask", "")
+      .style("stroke-width", "0px");
+    }
   }
 
   // Draw the map
@@ -226,6 +257,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     .on("mouseover", mouseOver)
     .on("mousemove", mouseMove)
     .on("mouseleave", mouseLeave)
+    .on("click", mouseClick)
 
   // For the first Year 2020 color fill update for country
   dataForHeatMap = normalizeIntensityScoreByYear(dataForHeatMap, currentYear, 0, 1);
