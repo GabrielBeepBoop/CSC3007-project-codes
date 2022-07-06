@@ -9,6 +9,8 @@ let currentCountry = "" // Current country selected by the mouse hover
 let isLock = false // To lock the selected region when left mouse button is clicked
 
 let svg = d3.select("svg").attr("viewBox", "0 0 " + width + " " + height)
+//set back
+
 const sensitivity = 75; // Sensitivity for dragging the globe
 
 // Map and projection
@@ -202,7 +204,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       .style('visibility', 'visible')
     currentCountry = d.properties.name;
     updateCountryTableProperty(dataForHeatMap, currentCountry, currentYear);
-    drawCountryLineChart(currentCountry)
   }
 
   // When the mouse moves over the country
@@ -214,7 +215,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
 
   // When the mouse is not over the country
   let mouseLeave = function (event, d) {
-    //d3.select("#chart").remove();
     d3.selectAll(".Country")
       .transition()
       .duration(200)
@@ -225,7 +225,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       .style("stroke", "transparent")
     tooltip
       .style('visibility', 'hidden')
-      currentCountry = "";
   }
 
   let mouseClick = function (event, d) {
@@ -244,6 +243,17 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       .style("stroke-width", "3px")
       .style("opacity", 1);
 
+      // Update Helper text
+      d3.select("#HelperText")
+      .text(currentCountry + " has been selected")
+
+      // Update Chart title for Line/Pie/Node
+      d3.select("#selectedCountryStats")
+      .text(currentCountry + "'s Statistics")
+
+      // Draw the Line chart
+      drawCountryLineChart(currentCountry)
+
     } else{
       // Add back the mouse events
       d3.selectAll("path").on("mouseover", mouseOver); 
@@ -254,6 +264,21 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       d3.select(event.currentTarget)
       .style("mask", "")
       .style("stroke-width", "0px");
+
+      // Update Helper text
+      d3.select("#HelperText")
+      .text("Please click on a country to see more details")
+
+      // Update Chart title for Line/Pie/Node
+      d3.select("#selectedCountryStats")
+      .text("Individual Country Statistics")
+
+      // Set current country to be empty
+      currentCountry = "";
+
+      // Remove the Chart
+      d3.select("#chart").remove();
+
     }
   }
 
@@ -269,6 +294,9 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     )
     // set the color of each country
     .attr("fill", d3.interpolateTurbo(0))
+
+    //.style("background", "#005EB8")
+
     // Set the ID to the name of each country 
     .attr("id", function (d) {
       return d.properties.name;
@@ -276,6 +304,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     .style("stroke", "transparent")
     .attr("class", function (d) { return "Country" })
     .style("opacity", .8)
+
 
     // Set the respective mouse movements functions
     .on("mouseover", mouseOver)
@@ -341,6 +370,23 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
   // Create the group to hold the legend
   var g = svg.append("g").attr("transform", "translate(" + padding + "," + 200 + ")");
 
+  // Helper Text
+  g.append("text")
+    .style("fill", "#000000")
+    .attr("x", 700)
+    .attr("y", -30)
+    .attr("font-size", "40px")
+    .attr("id", "HelperText")
+    .attr("class", "text-center")
+    .text(function() {
+      //default text
+      var text = "Please click on a country to see more details"
+      if (currentCountry != ""){
+        text = currentCountry + " has been selected"
+      }
+      return text;
+  })
+
   // Title for legends
   g.append("text")
     .style("fill", "#000000")
@@ -348,6 +394,8 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     .attr("y", -30)
     .attr("font-size", "50px")
     .text("Mortality Rate");
+
+
 
   var defs = svg.append("defs");
   var linearGradient = defs.append("linearGradient").attr("id", "myGradient")
@@ -384,9 +432,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     // parse the date / time
     var parseTime = d3.timeParse("%Y-%m-%d");
     var formatTime = d3.timeFormat("%Y-%m-%d");
-
-    //Remove chart before drawing
-    d3.select("#chart").remove();
 
     //Obtain all data for the selected country
     for (var i = 0; i < csvData.length; i++) {
@@ -490,19 +535,19 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
   //Obtain user selection and call function to change the fill of the circles and legend
 d3.select("#optionLineChart").on("click", function(d) {
   d3.select("#chart").remove();
-  drawCountryLineChart(selectedCountry);
+  drawCountryLineChart(currentCountry);
 })
 d3.select("#optionPieChart").on("click", function(d) {
   d3.select("#chart").remove();
-  drawCountryPieChart(selectedCountry);
+  drawCountryPieChart(currentCountry);
 })
 d3.select("#optionNodeChart").on("click", function(d) {
   d3.select("#chart").remove();
-  drawCountryNodeChart(selectedCountry);
+  drawCountryNodeChart(currentCountry);
 })
 
 // Disable 
-if (selectedCountry != ""){
+if (currentCountry != ""){
   d3.select("#optionLineChart").property("disabled", true);
   d3.select("#optionLineChart").property("disabled", true);
   d3.select("#optionLineChart").property("disabled", true);
