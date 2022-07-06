@@ -9,13 +9,37 @@ let currentCountry = "" // Current country selected by the mouse hover
 let isLock = false // To lock the selected region when left mouse button is clicked
 
 let svg = d3.select("svg").attr("viewBox", "0 0 " + width + " " + height)
+const sensitivity = 75; // Sensitivity for dragging the globe
 
 // Map and projection
 const path = d3.geoPath();
-const projection = d3.geoMercator()
+const projection = d3.geoOrthographic()
   .scale(250)
   .center([0, 20])
   .translate([width / 2, height / 2]);
+
+//Globe drag
+svg.call(d3.drag().on('drag', (event) => {
+    const rotate = projection.rotate()
+    const k = sensitivity / projection.scale()
+    projection.rotate([
+      rotate[0] + event.dx * k,
+      rotate[1] - event.dy * k
+    ])
+    globePaths = d3.geoPath().projection(projection)
+    svg.selectAll("path").attr("d", globePaths)
+  }))
+    .call(d3.zoom().on('zoom', () => {
+      if(this.transform.k > 0.3) {
+        projection.scale(initialScale * transform.k)
+        globePaths = d3.geoPath().projection(projection)
+        svg.selectAll("path").attr("d", globePaths)
+      }
+      else {
+        transform.k = 0.3
+      }
+    }))
+
 
 let zoom = d3.zoom()
   .on('zoom', handleZoom)
