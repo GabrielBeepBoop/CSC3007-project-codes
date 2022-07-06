@@ -177,7 +177,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       .style('visibility', 'visible')
     currentCountry = d.properties.name;
     updateCountryTableProperty(dataForHeatMap, currentCountry, currentYear);
-    drawCountryChart(currentCountry)
+    drawCountryLineChart(currentCountry)
   }
 
   // When the mouse moves over the country
@@ -189,7 +189,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
 
   // When the mouse is not over the country
   let mouseLeave = function (event, d) {
-    d3.select("#chart").remove();
+    //d3.select("#chart").remove();
     d3.selectAll(".Country")
       .transition()
       .duration(200)
@@ -319,7 +319,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     .select(".domain").remove();
 
   //Function to draw country chart
-  function drawCountryChart(selectedCountry) {
+  function drawCountryLineChart(selectedCountry) {
     let country = new Set()
     let countryData = []
     let date = ""
@@ -328,6 +328,9 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     // parse the date / time
     var parseTime = d3.timeParse("%Y-%m-%d");
     var formatTime = d3.timeFormat("%Y-%m-%d");
+
+    //Remove chart before drawing
+    d3.select("#chart").remove();
 
     //Obtain all data for the selected country
     for (var i = 0; i < csvData.length; i++) {
@@ -420,6 +423,41 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
           .style("opacity", 0);
       });
   }
+  // JH add your Pie chart drawing here
+  function drawCountryPieChart(selectedCountry){
+
+  }
+
+  function drawCountryNodeChart(selectedCountry){
+
+  }
+  //Obtain user selection and call function to change the fill of the circles and legend
+d3.select("#optionLineChart").on("click", function(d) {
+  d3.select("#chart").remove();
+  drawCountryLineChart(selectedCountry);
+})
+d3.select("#optionPieChart").on("click", function(d) {
+  d3.select("#chart").remove();
+  drawCountryPieChart(selectedCountry);
+})
+d3.select("#optionNodeChart").on("click", function(d) {
+  d3.select("#chart").remove();
+  drawCountryNodeChart(selectedCountry);
+})
+
+// Disable 
+if (selectedCountry != ""){
+  d3.select("#optionLineChart").property("disabled", true);
+  d3.select("#optionLineChart").property("disabled", true);
+  d3.select("#optionLineChart").property("disabled", true);
+}
+else{
+  d3.select("#optionLineChart").property("disabled", false);
+  d3.select("#optionLineChart").property("disabled", false);
+  d3.select("#optionLineChart").property("disabled", false);
+
+}
+
 })
 
 // Initalize the zoom

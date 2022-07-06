@@ -42,3 +42,10 @@ div.tooltip {
 .y.axis text {
   font-size: 35px;
 }
+
+.rectBackground {
+  fill: #D3D3D3;
+  stroke: #000;
+  stroke-width: 2px;
+  border: 2px solid #4d11f3;
+  }
