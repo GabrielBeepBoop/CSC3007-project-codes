@@ -150,10 +150,10 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
     .attr('class', 'd3-tooltip')
     .style('position', 'absolute')
     .style('visibility', 'hidden')
-    .style('padding', '10px')
-    .style('border-radius', '10px')
-    .style('color', 'white')
-    .style('background', 'rgba(0,0,0,0.8)')
+    .style('padding', '20px')
+    .style('border-radius', '1px')
+    .style('color', 'black')
+    .style('background', 'rgba(255,255,255,1)')
     .style('pointer-events', 'none')
 
   // When the mouse is over the country
@@ -168,7 +168,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
       .style("opacity", 1)
       .style("stroke", "black")
     tooltip
-      .html(d.properties.name)
+      .html("<strong>Country:</strong> <span >" + d.properties.name)
       .style('visibility', 'visible')
       currentCountry = d.properties.name;
       updateCountryTableProperty(dataForHeatMap, currentCountry, currentYear);
@@ -252,14 +252,15 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
   gHorizontal.call(sliderHorizontal);
 
   //Legends
-   var data = []
+   var data = [];
 
   for (var i =0; i <= 10; i++)
   {
     data.push({"color": d3.interpolateTurbo( parseFloat(i)/ 10),"value": parseFloat(i)/10});
   }
+  const rangeMultiplier = 100;
     
-  var extent = d3.extent(data, d => d.value);
+  var extent = d3.extent(data, d =>  parseFloat(d.value) * rangeMultiplier);
   var padding = 100;
   var barWidth = 40;
   var innerHeight = height - (padding * 5);
@@ -269,10 +270,11 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
       .domain(extent);
 
   // Ticks and axis for y axis
-  var yTicks = data.map(d => d.value);
+  var yTicks = data.map(d => parseFloat(d.value) * rangeMultiplier);
   var yAxis = d3.axisRight(yScale)
       .tickSize(barWidth * 2)
-      .tickValues(yTicks);
+      .tickValues(yTicks)
+      .tickFormat(d => d + "%");
 
   // Create the group to hold the legend
   var g = svg.append("g").attr("transform", "translate(" + padding + "," + 200 + ")");
@@ -296,7 +298,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath) ]).then(function (loadData) {
   linearGradient.selectAll("stop")
       .data(data)
     .enter().append("stop")
-      .attr("offset", d => ((d.value - extent[0]) / (extent[1] - extent[0]) * 100) + "%")
+      .attr("offset", d => ((d.value  * rangeMultiplier - extent[0]) / (extent[1] - extent[0]) * 100) + "%")
       .attr("stop-color", d => d.color);
 
   // Overlay the gradient within the recentagle
