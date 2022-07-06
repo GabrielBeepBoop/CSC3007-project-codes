@@ -14,7 +14,7 @@ const sensitivity = 75; // Sensitivity for dragging the globe
 // Map and projection
 const path = d3.geoPath();
 const projection = d3.geoOrthographic()
-  .scale(250)
+  .scale(600)
   .center([0, 20])
   .translate([width / 2, height / 2]);
 
