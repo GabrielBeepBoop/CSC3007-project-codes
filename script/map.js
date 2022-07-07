@@ -1,7 +1,7 @@
 var width = 2400;
 var height = 1900;
+var noOfNodes = 100;
 var GeoURL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
-//var csvPath = "./data/owid-covid-data_processed.csv" // path to csv containing the COVID-19 data
 var csvPath = "https://raw.githubusercontent.com/GabrielBeepBoop/Covid-dataset/main/owid-covid-data_processed.csv" // path to csv containing the COVID-19 data
 var oceanURL = "https://gist.githubusercontent.com/jrrickard/8755532505a40f3b8317/raw/ecd98849d3a5f4502b773b986254f19af3b8d8fb/oceans.json";
 
@@ -246,9 +246,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
       // Draw the Line chart
       drawCountryLineChart(currentCountry)
 
-      // Draw the Pie chart
-      //drawCountryPieChart(currentCountry)
-
     } else {
       // Add back the mouse events
       d3.selectAll("path").on("mouseover", mouseOver);
@@ -272,8 +269,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
       currentCountry = "";
 
       // Clear all the charts
-      d3.select("#countryChart").selectAll("g").remove()
-      d3.select("#countryChart").selectAll("svg").remove()
+      clearChart();
 
     }
   }
@@ -457,8 +453,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
       height = 500 - margin.top - margin.bottom;
 
     // Clear the graph before drawing
-    var svg = d3.select("#countryChart").selectAll("g").remove()
-    var svg = d3.select("#countryChart").selectAll("svg").remove()
+    clearChart();
 
     // Add country chart
     let countryChart = d3.select("#countryChart")
@@ -568,8 +563,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     const radius = Math.min(width, height) / 2 - margin.top;
 
     // Clear the graph before drawing
-    var svg = d3.select("#countryChart").selectAll("g").remove()
-    var svg = d3.select("#countryChart").selectAll("svg").remove()
+    clearChart();
 
     // Append the svg object to the div
     svg = d3.select("#countryChart")
@@ -635,8 +629,102 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
   }
 
   function drawCountryNodeChart(selectedCountry) {
+    let nodeData = []
+    let obj = {}
+    width = 740
+    height = 650
 
-  }
+    // Filter by node by selected country and take the latest value by year
+    for (var i = 0; i < csvData.length; i++) {
+      if ((csvData[i]["location"] == selectedCountry)) {
+        nodeData.push(csvData[i])
+      }
+    }
+    // Take the last value from the array
+    nodeData = nodeData[nodeData.length - 1];
+
+    // Scale values and convert to Integer
+    var populationDensity = +nodeData['population_density'];
+    var population = +nodeData['population'];
+
+    // every 100 person = 1 ball
+    population = population/100
+
+
+    // TODO
+    let data = [];
+    for (let i=0; i < noOfNodes; i++) {
+      obj = {}
+    data.push(obj);
+}
+
+// Clear the graph before drawing
+clearChart();
+
+
+let simulation = d3.forceSimulation(data)
+.force("charge", d3.forceManyBody().strength(-populationDensity))
+.force("center", d3.forceCenter(width/2, height/2))
+.force("x", d3.forceX()
+    .strength(0.1)
+)
+.force("y", d3.forceY()
+    .y(height / 2)
+    .strength(0.1)
+)
+.on("tick", tick);
+
+function tick() {
+  circle
+  .attr("cx", d => d.x)
+  .attr("cy", d => d.y);
+}
+
+let svg = d3.select("#countryChart")
+
+let nodes = svg.append("g").attr("id", "nodes")
+.selectAll("g")
+.data(data)
+.enter()
+.append("g");
+
+let circle = nodes.append("circle")
+.attr("class", "node")
+.attr("r", 15)
+.attr("fill","blue")
+.call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
+
+// Draw the Legends
+svg.append("text")
+.attr('x',15)
+.attr('y',40)
+.text("Population Density: " + populationDensity)
+.attr('alignment-baseline','middle')
+.attr('text-anchor','start')
+.attr('id',"NodeChartLegend")
+
+                //Function for Dragging the nodes
+      function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+      
+      function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+      }
+      
+      function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      }
+ 
+}
   // Obtain user selection and call function to change the fill of the circles and legend
   d3.select("#optionLineChart").on("click", function (d) {
     drawCountryLineChart(currentCountry);
@@ -662,6 +750,13 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
   }
 
 })
+
+// Function to clear chart
+function clearChart(){
+  d3.select("#countryChart").selectAll("g").remove()
+  d3.select("#countryChart").selectAll("svg").remove()
+  d3.select("#NodeChartLegend").remove()
+}
 
 // Initalize the zoom
 initZoom();
