@@ -3,6 +3,7 @@ var height = 1900;
 var GeoURL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
 //var csvPath = "./data/owid-covid-data_processed.csv" // path to csv containing the COVID-19 data
 var csvPath = "https://raw.githubusercontent.com/GabrielBeepBoop/Covid-dataset/main/owid-covid-data_processed.csv" // path to csv containing the COVID-19 data
+var oceanURL = "https://gist.githubusercontent.com/jrrickard/8755532505a40f3b8317/raw/ecd98849d3a5f4502b773b986254f19af3b8d8fb/oceans.json";
 
 let currentYear = 0; // Store current year
 let currentCountry = "" // Current country selected by the mouse hover
@@ -14,11 +15,12 @@ let svg = d3.select("svg").attr("viewBox", "0 0 " + width + " " + height)
 const sensitivity = 75; // Sensitivity for dragging the globe
 
 // Map and projection
-const path = d3.geoPath();
 const projection = d3.geoOrthographic()
   .scale(600)
   .center([0, 20])
   .translate([width / 2, height / 2]);
+
+const path = d3.geoPath(projection);
 
 //Globe drag
 svg.call(d3.drag().on('drag', (event) => {
@@ -30,18 +32,8 @@ svg.call(d3.drag().on('drag', (event) => {
   ])
   globePaths = d3.geoPath().projection(projection)
   svg.selectAll("path").attr("d", globePaths)
-}))
-  .call(d3.zoom().on('zoom', () => {
-    if (this.transform.k > 0.3) {
-      projection.scale(initialScale * transform.k)
-      globePaths = d3.geoPath().projection(projection)
-      svg.selectAll("path").attr("d", globePaths)
-    }
-    else {
-      transform.k = 0.3
-    }
-  }))
-
+}));
+  
 
 let zoom = d3.zoom()
   .on('zoom', handleZoom)
@@ -114,7 +106,7 @@ function updateCountryTableProperty(data, nameOfCountry, year) {
 }
 
 // Load external data and boot
-Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
+Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function (loadData) {
   let topo = loadData[0]
   let csvData = loadData[1];
 
@@ -286,35 +278,45 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     }
   }
 
+  let groupForGlobe = svg.append("g");
+
   // Draw the map
-  svg.append("g")
-    .selectAll("path")
-    .data(topo.features)
-    .enter()
-    .append("path")
-    // Draw each country
-    .attr("d", d3.geoPath()
-      .projection(projection)
-    )
-    // set the color of each country
-    .attr("fill", d3.interpolateTurbo(0))
+  groupForGlobe.append("g")
+  .selectAll("path")
+  .data(topo.features)
+  .enter()
+  .append("path")
+  // Draw each country
+  .attr("d", d3.geoPath()
+    .projection(projection)
+  )
+  // set the color of each country
+  .attr("fill", d3.interpolateTurbo(0))
 
-    //.style("background", "#005EB8")
+  // Set the ID to the name of each country 
+  .attr("id", function (d) {
+    return d.properties.name;
+  })
+  .style("stroke", "transparent")
+  .attr("class", function (d) { return "Country" })
+  .style("opacity", .8)
 
-    // Set the ID to the name of each country 
-    .attr("id", function (d) {
-      return d.properties.name;
-    })
-    .style("stroke", "transparent")
-    .attr("class", function (d) { return "Country" })
-    .style("opacity", .8)
+  // Set the respective mouse movements functions
+  .on("mouseover", mouseOver)
+  .on("mousemove", mouseMove)
+  .on("mouseleave", mouseLeave)
+  .on("click", mouseClick)
 
-
-    // Set the respective mouse movements functions
-    .on("mouseover", mouseOver)
-    .on("mousemove", mouseMove)
-    .on("mouseleave", mouseLeave)
-    .on("click", mouseClick)
+  //Append Ocean data
+  groupForGlobe.append("g")
+  .attr("id", "ocean")
+  .selectAll("path")
+  .data(loadData[2].features)
+  .enter()
+  .append("path")
+  .attr("d", d3.geoPath()
+  .projection(projection))
+  .style("fill", "steelblue");
 
   // For the first Year 2020 color fill update for country
   dataForHeatMap = normalizeIntensityScoreByYear(dataForHeatMap, currentYear, 0, 1);
@@ -442,15 +444,12 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
         countryData.push(csvData[i])
       }
     }
-    console.log(countryData)
-
     // Map deaths data to each date
     for (var i = 0; i < countryData.length; i++) {
       date = formatTime(countryData[i]["date"])
       deaths = countryData[i]["new_deaths"]
       deathData.push({ "date": date, "deaths": +deaths })
     }
-    //console.log(deathData)
 
     // Dimensions for the chart
     let margin = { top: 20, right: 20, bottom: 40, left: 40 },
@@ -550,7 +549,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
         countryData.push(csvData[i])
       }
     }
-    //console.log(countryData)
 
     // Map deaths data to each date
     for (var i = 0; i < countryData.length; i++) {
@@ -560,8 +558,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       population = countryData[i]["population"]
       vaccinationData.push({ "Unvaccinated": (((+population - +vaccinated) / +population) * 100), "Vaccinated": ((+vaccinated / +population) * 100) })
     }
-    //console.log(vaccinationData)
-
+  
     // Dimensions for the chart
     let margin = { top: 20, right: 20, bottom: 40, left: 40 },
       width = 1200 - margin.left - margin.right,
@@ -588,7 +585,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
 
     // Function to create / update the plot for a given variable
     function update(data) {
-      console.log(data)
 
       // Compute position of each group on the pie
       const pie = d3.pie()
