@@ -303,7 +303,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
   .on("mouseleave", mouseLeave)
   .on("click", mouseClick)
 
-  //Append Ocean data
+  // Append Ocean data
   groupForGlobe.append("g")
   .attr("id", "ocean")
   .selectAll("path")
@@ -452,9 +452,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
       width = 1200 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
-    // Clear the graph before drawing
-    clearChart();
-
     // Add country chart
     let countryChart = d3.select("#countryChart")
       .append("g")
@@ -562,9 +559,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     //Set radius of the pie chart
     const radius = Math.min(width, height) / 2 - margin.top;
 
-    // Clear the graph before drawing
-    clearChart();
-
     // Append the svg object to the div
     svg = d3.select("#countryChart")
       .append("svg")
@@ -627,7 +621,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     update(vaccinationData[0])
 
   }
-
   function drawCountryNodeChart(selectedCountry) {
     let nodeData = []
     let obj = {}
@@ -646,23 +639,24 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     // Scale values and convert to Integer
     var populationDensity = +nodeData['population_density'];
     var population = +nodeData['population'];
+    var vacPeople = Math.ceil(+nodeData['people_fully_vaccinated']/population * 100);
+    var unvacPeople = 100 - vacPeople
 
-    // every 100 person = 1 ball
-    population = population/100
-
-
-    // TODO
     let data = [];
-    for (let i=0; i < noOfNodes; i++) {
-      obj = {}
-    data.push(obj);
-}
 
-// Clear the graph before drawing
-clearChart();
+    // Add Vaccinated to obj
+    for (let i = 0; i < vacPeople; i++){
+      obj = {"id": i, "status": "Vaccinated"};
+      data.push(obj);
+    } // Add Unvaccinated to obj
+    for (let i = vacPeople; i < (vacPeople+unvacPeople); i++){
+      obj = {"id": i, "status": "Unvaccinated"};
+      data.push(obj);
+    }
 
 
 let simulation = d3.forceSimulation(data)
+// Higher Density = More Compact
 .force("charge", d3.forceManyBody().strength(-populationDensity))
 .force("center", d3.forceCenter(width/2, height/2))
 .force("x", d3.forceX()
@@ -691,20 +685,73 @@ let nodes = svg.append("g").attr("id", "nodes")
 let circle = nodes.append("circle")
 .attr("class", "node")
 .attr("r", 15)
-.attr("fill","blue")
+.attr("fill", d => { 
+  if (d.status == "Vaccinated") {
+      return "Green";
+  } else {
+      return "Red";
+  }
+})
 .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended));
 
-// Draw the Legends
+// Draw the Label
+svg.append("text")
+.attr('x',15)
+.attr('y',20)
+.text("Graph is scaled to 100 Nodes")
+.attr('alignment-baseline','middle')
+.attr('text-anchor','start')
+.attr('class',"NodeChartLegend")
+
 svg.append("text")
 .attr('x',15)
 .attr('y',40)
-.text("Population Density: " + populationDensity)
+.text("Total Population: " + addComma(population) + " People")
 .attr('alignment-baseline','middle')
 .attr('text-anchor','start')
-.attr('id',"NodeChartLegend")
+.attr('class',"NodeChartLegend")
+
+svg.append("text")
+.attr('x',15)
+.attr('y',60)
+.text("Population Density: " + populationDensity + " No. of people per square meter")
+.attr('alignment-baseline','middle')
+.attr('text-anchor','start')
+.attr('class',"NodeChartLegend")
+
+
+svg.append("circle")
+.attr('cx',20)
+.attr('cy',80)
+.attr('r',9)
+.style('fill', "Green")
+.attr('class',"NodeChartLegend")
+
+svg.append("text")
+.attr('x',35)
+.attr('y',80)
+.text("Vaccinated")
+.attr('alignment-baseline','middle')
+.attr('text-anchor','start')
+.attr('class',"NodeChartLegend")
+
+svg.append("circle")
+.attr('cx',20)
+.attr('cy',100)
+.attr('r',9)
+.style('fill', "Red")
+.attr('class',"NodeChartLegend")
+
+svg.append("text")
+.attr('x',35)
+.attr('y',100)
+.text("Unvaccinated")
+.attr('alignment-baseline','middle')
+.attr('text-anchor','start')
+.attr('class',"NodeChartLegend")
 
                 //Function for Dragging the nodes
       function dragstarted(event, d) {
@@ -725,14 +772,21 @@ svg.append("text")
       }
  
 }
+
   // Obtain user selection and call function to change the fill of the circles and legend
   d3.select("#optionLineChart").on("click", function (d) {
+    // Clear the chart before drawing
+    clearChart();
     drawCountryLineChart(currentCountry);
   })
   d3.select("#optionPieChart").on("click", function (d) {
+    // Clear the chart before drawing
+    clearChart();
     drawCountryPieChart(currentCountry);
   })
   d3.select("#optionNodeChart").on("click", function (d) {
+    // Clear the chart before drawing
+    clearChart();
     drawCountryNodeChart(currentCountry);
   })
 
@@ -755,7 +809,12 @@ svg.append("text")
 function clearChart(){
   d3.select("#countryChart").selectAll("g").remove()
   d3.select("#countryChart").selectAll("svg").remove()
-  d3.select("#NodeChartLegend").remove()
+  d3.selectAll(".NodeChartLegend").remove()
+}
+
+// Function to add comma to large numbers
+function addComma(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // Initalize the zoom
