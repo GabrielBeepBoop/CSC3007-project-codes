@@ -1,7 +1,7 @@
 var width = 2400;
 var height = 1900;
 var noOfNodes = 100;
-var GeoURL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
+var GeoURL = "https://raw.githubusercontent.com/GabrielBeepBoop/CSC3007-project-codes/main/data/world.geojson?token=GHSAT0AAAAAABVZOWICJB45CMIXMRW6ZFECYWNMW2Q";
 var csvPath = "https://raw.githubusercontent.com/GabrielBeepBoop/Covid-dataset/main/owid-covid-data_processed.csv" // path to csv containing the COVID-19 data
 var oceanURL = "https://gist.githubusercontent.com/jrrickard/8755532505a40f3b8317/raw/ecd98849d3a5f4502b773b986254f19af3b8d8fb/oceans.json";
 
