@@ -33,7 +33,7 @@ svg.call(d3.drag().on('drag', (event) => {
   globePaths = d3.geoPath().projection(projection)
   svg.selectAll("path").attr("d", globePaths)
 }));
-  
+
 
 let zoom = d3.zoom()
   .on('zoom', handleZoom)
@@ -243,8 +243,9 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
       d3.select("#selectedCountryStats")
         .text(currentCountry + "'s Statistics")
 
-      // Draw the Line chart
-      drawCountryLineChart(currentCountry)
+      // Clear any existing charts and draw the line chart as default
+      clearChart()
+      drawCountryLineChart(currentCountry, currentYear)
 
     } else {
       // Add back the mouse events
@@ -278,41 +279,41 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
 
   // Draw the map
   groupForGlobe.append("g")
-  .selectAll("path")
-  .data(topo.features)
-  .enter()
-  .append("path")
-  // Draw each country
-  .attr("d", d3.geoPath()
-    .projection(projection)
-  )
-  // set the color of each country
-  .attr("fill", d3.interpolateTurbo(0))
+    .selectAll("path")
+    .data(topo.features)
+    .enter()
+    .append("path")
+    // Draw each country
+    .attr("d", d3.geoPath()
+      .projection(projection)
+    )
+    // set the color of each country
+    .attr("fill", d3.interpolateTurbo(0))
 
-  // Set the ID to the name of each country 
-  .attr("id", function (d) {
-    return d.properties.name;
-  })
-  .style("stroke", "transparent")
-  .attr("class", function (d) { return "Country" })
-  .style("opacity", .8)
+    // Set the ID to the name of each country 
+    .attr("id", function (d) {
+      return d.properties.name;
+    })
+    .style("stroke", "transparent")
+    .attr("class", function (d) { return "Country" })
+    .style("opacity", .8)
 
-  // Set the respective mouse movements functions
-  .on("mouseover", mouseOver)
-  .on("mousemove", mouseMove)
-  .on("mouseleave", mouseLeave)
-  .on("click", mouseClick)
+    // Set the respective mouse movements functions
+    .on("mouseover", mouseOver)
+    .on("mousemove", mouseMove)
+    .on("mouseleave", mouseLeave)
+    .on("click", mouseClick)
 
   // Append Ocean data
   groupForGlobe.append("g")
-  .attr("id", "ocean")
-  .selectAll("path")
-  .data(loadData[2].features)
-  .enter()
-  .append("path")
-  .attr("d", d3.geoPath()
-  .projection(projection))
-  .style("fill", "steelblue");
+    .attr("id", "ocean")
+    .selectAll("path")
+    .data(loadData[2].features)
+    .enter()
+    .append("path")
+    .attr("d", d3.geoPath()
+      .projection(projection))
+    .style("fill", "lightskyblue");
 
   // For the first Year 2020 color fill update for country
   dataForHeatMap = normalizeIntensityScoreByYear(dataForHeatMap, currentYear, 0, 1);
@@ -422,29 +423,98 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     .call(yAxis)
     .select(".domain").remove();
 
-  //Function to draw country chart
-  function drawCountryLineChart(selectedCountry) {
+  //Function to draw country line chart to visualize number of deaths
+  function drawCountryLineChart(selectedCountry, currentYear) {
     let country = new Set()
     let countryData = []
-    let date = ""
-    let deaths = ""
     let deathData = []
     // Parse the date / time
-    var parseTime = d3.timeParse("%Y-%m-%d");
-    var formatTime = d3.timeFormat("%Y-%m-%d");
+    var parseDate = d3.timeParse("%Y-%m");
+    var formatMonth = d3.timeFormat("%B");
+    var formatYear = d3.timeFormat("%Y");
+    // Set deaths for each month to 0 by default
+    let totalJanDeaths = 0
+    let totalFebDeaths = 0
+    let totalMarDeaths = 0
+    let totalAprDeaths = 0
+    let totalMayDeaths = 0
+    let totalJunDeaths = 0
+    let totalJulDeaths = 0
+    let totalAugDeaths = 0
+    let totalSepDeaths = 0
+    let totalOctDeaths = 0
+    let totalNovDeaths = 0
+    let totalDecDeaths = 0
 
-    // Obtain all data for the selected country
+    // Obtain all data for year of the selected country
     for (var i = 0; i < csvData.length; i++) {
       country.add(csvData[i]["location"])
-      if (csvData[i]["location"] == selectedCountry) {
+      if ((csvData[i]["location"] == selectedCountry) && (formatYear(csvData[i]["date"]) == currentYear)) {
         countryData.push(csvData[i])
       }
     }
-    // Map deaths data to each date
+    // Add up the total number of deaths for each month
     for (var i = 0; i < countryData.length; i++) {
-      date = formatTime(countryData[i]["date"])
-      deaths = countryData[i]["new_deaths"]
-      deathData.push({ "date": date, "deaths": +deaths })
+      if (formatMonth(countryData[i]["date"]) == "January") {
+        totalJanDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "February") {
+        totalFebDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "March") {
+        totalMarDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "April") {
+        totalAprDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "May") {
+        totalMayDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "June") {
+        totalJunDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "July") {
+        totalJulDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "August") {
+        totalAugDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "September") {
+        totalSepDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "October") {
+        totalOctDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "November") {
+        totalNovDeaths += +countryData[i]["new_deaths"]
+      }
+      else if (formatMonth(countryData[i]["date"]) == "December") {
+        totalDecDeaths += +countryData[i]["new_deaths"]
+      }
+    }
+
+    // Map the total number of deaths to the respective month of the year
+    if (currentYear == "2020" || currentYear == "2021") {
+      deathData.push({ "date": currentYear + "-01", "deaths": totalJanDeaths })
+      deathData.push({ "date": currentYear + "-02", "deaths": totalFebDeaths })
+      deathData.push({ "date": currentYear + "-03", "deaths": totalMarDeaths })
+      deathData.push({ "date": currentYear + "-04", "deaths": totalAprDeaths })
+      deathData.push({ "date": currentYear + "-05", "deaths": totalMayDeaths })
+      deathData.push({ "date": currentYear + "-06", "deaths": totalJunDeaths })
+      deathData.push({ "date": currentYear + "-07", "deaths": totalJulDeaths })
+      deathData.push({ "date": currentYear + "-08", "deaths": totalAugDeaths })
+      deathData.push({ "date": currentYear + "-09", "deaths": totalSepDeaths })
+      deathData.push({ "date": currentYear + "-10", "deaths": totalOctDeaths })
+      deathData.push({ "date": currentYear + "-11", "deaths": totalNovDeaths })
+      deathData.push({ "date": currentYear + "-12", "deaths": totalDecDeaths })
+    }
+    else if (currentYear == "2022") {
+      deathData.push({ "date": currentYear + "-01", "deaths": totalJanDeaths })
+      deathData.push({ "date": currentYear + "-02", "deaths": totalFebDeaths })
+      deathData.push({ "date": currentYear + "-03", "deaths": totalMarDeaths })
+      deathData.push({ "date": currentYear + "-04", "deaths": totalAprDeaths })
+      deathData.push({ "date": currentYear + "-05", "deaths": totalMayDeaths })
+      deathData.push({ "date": currentYear + "-06", "deaths": totalJunDeaths })
     }
 
     // Dimensions for the chart
@@ -452,7 +522,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
       width = 1200 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
-    // Add country chart
+    // Add the chart
     let countryChart = d3.select("#countryChart")
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
@@ -473,13 +543,17 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
 
     // Format the data
     deathData.forEach(function (d) {
-      d.date = parseTime(d.date);
+      d.date = parseDate(d.date);
       d.deaths = +d.deaths;
     });
 
     // Scale the range of the data
     x.domain(d3.extent(deathData, function (d) { return d.date; }));
     y.domain([0, d3.max(deathData, function (d) { return d.deaths; })]);
+
+    // Format x-axis to only show the names of each month
+    var xAxis = d3.axisBottom(x)
+      .tickFormat(d3.timeFormat("%B"));
 
     // Add the path.
     countryChart.append("path")
@@ -491,7 +565,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     countryChart.append("g")
       .attr("class", "axis axis-x")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x))
+      .call(xAxis)
       .selectAll("text")
       .attr("transform", "rotate(-45)")
       .style("text-anchor", "end");
@@ -511,7 +585,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
         div.transition()
           .duration(200)
           .style("opacity", .9);
-        div.html("Date: " + formatTime(d.date) + "<br/>Deaths: " + d.deaths)
+        div.html("Month: " + formatMonth(d.date) + "<br/>Deaths: " + d.deaths)
           .style("left", (event.pageX) + "px")
           .style("top", (event.pageY - 28) + "px");
       })
@@ -521,8 +595,9 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
           .style("opacity", 0);
       });
   }
-  // Pie chart
-  function drawCountryPieChart(selectedCountry) {
+
+  //Function to draw country pie chart to visualize number of vaccinations
+  function drawCountryPieChart(selectedCountry, currentYear) {
 
     let country = new Set()
     let countryData = []
@@ -530,34 +605,63 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     let population = ""
     let vaccinationData = []
 
-    // Selected date
-    let selectedDate = "2022-06-01"
-    var formatTime = d3.timeFormat("%Y-%m-%d");
+    // Obtain latest vaccination data from the year (for 2022 last day of May is chosen as the most recent vaccination data is not avaliable for all countries)
+    if (currentYear == "2020") {
+      selectedDate = "2020-12-31"
+    }
+    else if (currentYear == "2021") {
+      selectedDate = "2021-12-31"
+    }
+    else if (currentYear == "2022") {
+      selectedDate = "2022-05-31"
+    }
 
-    // Obtain all data for the selected country
+    // Selected date
+    var formatDate = d3.timeFormat("%Y-%m-%d");
+
+    // Obtain all vaccination data for the selected country and date
     for (var i = 0; i < csvData.length; i++) {
       country.add(csvData[i]["location"])
-      if ((csvData[i]["location"] == selectedCountry) && (formatTime(csvData[i]["date"]) == selectedDate)) {
+      if ((csvData[i]["location"] == selectedCountry) && (formatDate(csvData[i]["date"]) == selectedDate)) {
         countryData.push(csvData[i])
       }
     }
 
-    // Map deaths data to each date
+    // Map vaccination data based on vaccination status of the population
     for (var i = 0; i < countryData.length; i++) {
       vaccinated = countryData[i]["people_vaccinated"]
       vaccinatedFull = countryData[i]["people_fully_vaccinated"]
       vaccinatedBoost = countryData[i]["total_boosters"]
       population = countryData[i]["population"]
-      vaccinationData.push({ "Unvaccinated": (((+population - +vaccinated) / +population) * 100), "Vaccinated": ((+vaccinated / +population) * 100) })
+      percentBoost = ((+vaccinatedBoost / +population) * 100)
+      percentFull = ((+vaccinatedFull / +population) * 100) - percentBoost
+      percentSingle = ((+vaccinated / +population) * 100) - ((+vaccinatedFull / +population) * 100)
+      percentNone = (((+population - +vaccinated) / +population) * 100)
+      vaccinationData.push({ "Unvaccinated": percentNone, "Vaccinated (1 dose)": percentSingle, "Vaccinated (2 doses)": percentFull, "Vaccinated (Boosted)": percentBoost })
     }
-  
+
     // Dimensions for the chart
     let margin = { top: 20, right: 20, bottom: 40, left: 40 },
       width = 1200 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
-    //Set radius of the pie chart
+    // Set radius of the pie chart
     const radius = Math.min(width, height) / 2 - margin.top;
+
+    // Define the domain and colors for use with color scale and legend
+    let vaccinatedDomain = new Map([["Unvaccinated", "lightcoral"], ["Vaccinated (1 dose)", "palegoldenrod"], ["Vaccinated (2 doses)", "lightgreen"], ["Vaccinated (Boosted)", "lightskyblue"]])
+
+    // Define color scale
+    var vaccinatedScale = d3.scaleThreshold()
+      .domain(vaccinatedDomain.keys())
+      .range(vaccinatedDomain.values())
+
+    // Define legend
+    var legend = d3.legendColor()
+      .labels(vaccinatedDomain.keys())
+      .scale(vaccinatedScale)
+      .title("Vaccination Status")
+      .shape("path", d3.symbol().type(d3.symbolCircle).size(150)())
 
     // Append the svg object to the div
     svg = d3.select("#countryChart")
@@ -567,17 +671,22 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
       .append("g")
       .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-    // Set the color scale
-    const color = d3.scaleOrdinal()
-      .range(d3.schemeDark2);
+    // Add legend to the svg
+    svg.
+      append("g")
+      .attr("class", "PieChartLegend")
+      .attr("transform", "translate(-500,-180)")
+      .style("font-size", "15px")
+      .style("fill", "black")
+      .call(legend)
 
-    // Function to create / update the plot for a given variable
+    // Function to create or update the pie chart
     function update(data) {
 
       // Compute position of each group on the pie
       const pie = d3.pie()
         .value(function (d) { return d[1]; })
-        .sort(function (a, b) { return d3.ascending(a.key, b.key); }) // This make sure that group order remains the same in the pie chart
+        .sort(function (a, b) { return d3.ascending(a.key, b.key); })
       const data_ready = pie(Object.entries(data))
 
       // Shape helper to build arcs
@@ -585,6 +694,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
         .innerRadius(0)
         .outerRadius(radius)
 
+      // Append tooltip
       var div = d3.select("body").append("div")
         .attr("class", "tooltip")
         .style("opacity", 0);
@@ -595,7 +705,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
         .data(data_ready)
         .join('path')
         .attr('d', arcGenerator)
-        .attr('fill', function (d) { return (color(d.data[0])) })
+        .attr('fill', function (d) { return vaccinatedDomain.get(d.data[0]) })
         .attr("stroke", "white")
         .style("stroke-width", "2px")
         .style("opacity", 1)
@@ -619,9 +729,9 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
         });
     }
     update(vaccinationData[0])
-
   }
-  // Node Chart
+
+  //Function to draw country node chart to visualize number of vaccinations per 100 people
   function drawCountryNodeChart(selectedCountry) {
     let nodeData = []
     let obj = {}
@@ -640,187 +750,211 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     // Scale values and convert to Integer
     var populationDensity = +nodeData['population_density'];
     var population = +nodeData['population'];
-    var vacPeople = Math.ceil(+nodeData['people_fully_vaccinated']/population * 100);
+    var vacPeople = Math.ceil(+nodeData['people_fully_vaccinated'] / population * 100);
     var unvacPeople = 100 - vacPeople
 
     let data = [];
 
     // Add Vaccinated to obj
-    for (let i = 0; i < vacPeople; i++){
-      obj = {"id": i, "status": "Vaccinated"};
+    for (let i = 0; i < vacPeople; i++) {
+      obj = { "id": i, "status": "Vaccinated" };
       data.push(obj);
     } // Add Unvaccinated to obj
-    for (let i = vacPeople; i < (vacPeople+unvacPeople); i++){
-      obj = {"id": i, "status": "Unvaccinated"};
+    for (let i = vacPeople; i < (vacPeople + unvacPeople); i++) {
+      obj = { "id": i, "status": "Unvaccinated" };
       data.push(obj);
     }
 
 
-let simulation = d3.forceSimulation(data)
-// Higher Density = More Compact
-.force("charge", d3.forceManyBody().strength(-populationDensity))
-.force("center", d3.forceCenter(width/2, height/2))
-.force("x", d3.forceX()
-    .strength(0.1)
-)
-.force("y", d3.forceY()
-    .y(height / 2)
-    .strength(0.1)
-)
-.on("tick", tick);
+    let simulation = d3.forceSimulation(data)
+      // Higher Density = More Compact
+      .force("charge", d3.forceManyBody().strength(-populationDensity))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("x", d3.forceX()
+        .strength(0.1)
+      )
+      .force("y", d3.forceY()
+        .y(height / 2)
+        .strength(0.1)
+      )
+      .on("tick", tick);
 
-function tick() {
-  circle
-  .attr("cx", d => d.x)
-  .attr("cy", d => d.y);
-}
+    function tick() {
+      circle
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
+    }
 
-let svg = d3.select("#countryChart")
+    let svg = d3.select("#countryChart")
 
-let nodes = svg.append("g").attr("id", "nodes")
-.selectAll("g")
-.data(data)
-.enter()
-.append("g");
+    let nodes = svg.append("g").attr("id", "nodes")
+      .selectAll("g")
+      .data(data)
+      .enter()
+      .append("g");
 
-let circle = nodes.append("circle")
-.attr("class", "node")
-.attr("r", 15)
-.attr("fill", d => { 
-  if (d.status == "Vaccinated") {
-      return "Green";
-  } else {
-      return "Red";
-  }
-})
-.call(d3.drag()
+    let circle = nodes.append("circle")
+      .attr("class", "node")
+      .attr("r", 15)
+      .attr("fill", d => {
+        if (d.status == "Vaccinated") {
+          return "Green";
+        } else {
+          return "Red";
+        }
+      })
+      .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended));
 
-// Draw the Label
-svg.append("text")
-.attr('x',15)
-.attr('y',20)
-.text("Graph is scaled to 100 Nodes")
-.attr('alignment-baseline','middle')
-.attr('text-anchor','start')
-.attr('class',"NodeChartLegend")
+    // Draw the Label
+    svg.append("text")
+      .attr('x', 15)
+      .attr('y', 20)
+      .text("Graph is scaled to 100 Nodes")
+      .attr('alignment-baseline', 'middle')
+      .attr('text-anchor', 'start')
+      .attr('class', "NodeChartLegend")
 
-svg.append("text")
-.attr('x',15)
-.attr('y',40)
-.text("Total Population: " + addComma(population) + " People")
-.attr('alignment-baseline','middle')
-.attr('text-anchor','start')
-.attr('class',"NodeChartLegend")
+    svg.append("text")
+      .attr('x', 15)
+      .attr('y', 40)
+      .text("Total Population: " + addComma(population) + " People")
+      .attr('alignment-baseline', 'middle')
+      .attr('text-anchor', 'start')
+      .attr('class', "NodeChartLegend")
 
-svg.append("text")
-.attr('x',15)
-.attr('y',60)
-.text("Population Density: " + populationDensity + " No. of people per square meter")
-.attr('alignment-baseline','middle')
-.attr('text-anchor','start')
-.attr('class',"NodeChartLegend")
+    svg.append("text")
+      .attr('x', 15)
+      .attr('y', 60)
+      .text("Population Density: " + populationDensity + " No. of people per square meter")
+      .attr('alignment-baseline', 'middle')
+      .attr('text-anchor', 'start')
+      .attr('class', "NodeChartLegend")
 
+    svg.append("circle")
+      .attr('cx', 20)
+      .attr('cy', 80)
+      .attr('r', 9)
+      .style('fill', "Green")
+      .attr('class', "NodeChartLegend")
 
-svg.append("circle")
-.attr('cx',20)
-.attr('cy',80)
-.attr('r',9)
-.style('fill', "Green")
-.attr('class',"NodeChartLegend")
+    svg.append("text")
+      .attr('x', 35)
+      .attr('y', 80)
+      .text("Vaccinated")
+      .attr('alignment-baseline', 'middle')
+      .attr('text-anchor', 'start')
+      .attr('class', "NodeChartLegend")
 
-svg.append("text")
-.attr('x',35)
-.attr('y',80)
-.text("Vaccinated")
-.attr('alignment-baseline','middle')
-.attr('text-anchor','start')
-.attr('class',"NodeChartLegend")
+    svg.append("circle")
+      .attr('cx', 20)
+      .attr('cy', 100)
+      .attr('r', 9)
+      .style('fill', "Red")
+      .attr('class', "NodeChartLegend")
 
-svg.append("circle")
-.attr('cx',20)
-.attr('cy',100)
-.attr('r',9)
-.style('fill', "Red")
-.attr('class',"NodeChartLegend")
+    svg.append("text")
+      .attr('x', 35)
+      .attr('y', 100)
+      .text("Unvaccinated")
+      .attr('alignment-baseline', 'middle')
+      .attr('text-anchor', 'start')
+      .attr('class', "NodeChartLegend")
 
-svg.append("text")
-.attr('x',35)
-.attr('y',100)
-.text("Unvaccinated")
-.attr('alignment-baseline','middle')
-.attr('text-anchor','start')
-.attr('class',"NodeChartLegend")
+    //Function for Dragging the nodes
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
 
-                //Function for Dragging the nodes
-      function dragstarted(event, d) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-      }
-      
-      function dragged(event, d) {
-        d.fx = event.x;
-        d.fy = event.y;
-      }
-      
-      function dragended(event, d) {
-        if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-      }
- 
-}
-// Text to be displayed if country is undefined
-function drawCountryUndefined(){
-  let svg = d3.select("#countryChart")
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+  }
+
+  // Text to be displayed if country is not selected
+    function drawCountryNotSeleccted() {
+      let svg = d3.select("#countryChart")
   
-  svg.append("text")
-  .attr('x',400)
-  .attr('y',250)
-  .text("Data does not exist for this country, please select another one")
-  .attr('alignment-baseline','middle')
-  .attr('text-anchor','start')
-  .attr('class',"NodeChartLegend")
+      svg.append("text")
+        .attr('x', 400)
+        .attr('y', 250)
+        .text("No country is selected, please select one from the globe to view")
+        .attr('alignment-baseline', 'middle')
+        .attr('text-anchor', 'start')
+        .attr('class', "NodeChartLegend")
+    }
+  
 
-}
+  // Text to be displayed if country is undefined
+  function drawCountryUndefined() {
+    let svg = d3.select("#countryChart")
 
-  // Obtain user selection and call function to change the fill of the circles and legend
+    svg.append("text")
+      .attr('x', 400)
+      .attr('y', 250)
+      .text("Data does not exist for this country, please select another one")
+      .attr('alignment-baseline', 'middle')
+      .attr('text-anchor', 'start')
+      .attr('class', "NodeChartLegend")
+  }
+
+  // Obtain user selection and call function to display the charts
   d3.select("#optionLineChart").on("click", function (d) {
     // Clear the chart before drawing
     clearChart();
-    if (currentCountry != undefined){
-      drawCountryLineChart(currentCountry);
+    // Only show chart if country is not blank or undefined
+    if (currentCountry == "") {
+      drawCountryNotSeleccted();
     }
-    else{
+    else if (currentCountry == undefined) {
       drawCountryUndefined();
+    }
+    else {
+      drawCountryLineChart(currentCountry, currentYear);
     }
   })
   d3.select("#optionPieChart").on("click", function (d) {
     // Clear the chart before drawing
     clearChart();
-    if (currentCountry != undefined){
-      drawCountryPieChart(currentCountry);
+    // Only show chart if country is not blank or undefined
+    if (currentCountry == "") {
+      drawCountryNotSeleccted();
     }
-    else{
+    else if (currentCountry == undefined) {
       drawCountryUndefined();
+    }
+    else {
+      drawCountryPieChart(currentCountry, currentYear);
     }
   })
   d3.select("#optionNodeChart").on("click", function (d) {
     // Clear the chart before drawing
     clearChart();
-    if (currentCountry != undefined){
-      drawCountryNodeChart(currentCountry);
+    // Only show chart if country is not blank or undefined
+    if (currentCountry == "") {
+      drawCountryNotSeleccted();
     }
-    else{
+    else if (currentCountry == undefined) {
       drawCountryUndefined();
+    }
+    else {
+      drawCountryNodeChart(currentCountry, currentYear);
     }
   })
 
   // Disable charts 
-  if (currentCountry != "" || currentCountry == undefined ) {
+  if (currentCountry != "") {
     d3.select("#optionLineChart").property("disabled", true);
     d3.select("#optionLineChart").property("disabled", true);
     d3.select("#optionLineChart").property("disabled", true);
@@ -829,15 +963,15 @@ function drawCountryUndefined(){
     d3.select("#optionLineChart").property("disabled", false);
     d3.select("#optionLineChart").property("disabled", false);
     d3.select("#optionLineChart").property("disabled", false);
-
   }
 
 })
 
 // Function to clear chart
-function clearChart(){
+function clearChart() {
   d3.select("#countryChart").selectAll("g").remove()
   d3.select("#countryChart").selectAll("svg").remove()
+  d3.selectAll(".PieChartLegend").remove()
   d3.selectAll(".NodeChartLegend").remove()
 }
 
@@ -845,8 +979,6 @@ function clearChart(){
 function addComma(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-
-// Fun
 
 // Initalize the zoom
 initZoom();
