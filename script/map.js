@@ -3,7 +3,6 @@ var height = 1900;
 var noOfNodes = 100;
 var GeoURL = "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson";
 var csvPath = "https://raw.githubusercontent.com/GabrielBeepBoop/Covid-dataset/main/owid-covid-data_processed.csv" // path to csv containing the COVID-19 data
-var oceanURL = "https://gist.githubusercontent.com/jrrickard/8755532505a40f3b8317/raw/ecd98849d3a5f4502b773b986254f19af3b8d8fb/oceans.json";
 
 let currentYear = 0; // Store current year
 let currentCountry = "" // Current country selected by the mouse hover
@@ -13,11 +12,12 @@ let svg = d3.select("svg").attr("viewBox", "0 0 " + width + " " + height)
 //set back
 
 const sensitivity = 75; // Sensitivity for dragging the globe
+const scaleFactor = 500;
 
 // Map and projection
 const projection = d3.geoOrthographic()
-  .scale(600)
-  .center([0, 20])
+  .scale(scaleFactor)
+  .center([0, 0])
   .translate([width / 2, height / 2]);
 
 const path = d3.geoPath(projection);
@@ -93,8 +93,6 @@ function updateCountryTableProperty(data, nameOfCountry, year) {
     // Update statistics for that chosen country
     d3.select("#country").text(nameOfCountry);
     d3.select("#year").text(year);
-    console.log(element);
-    console.log(element["total_death"]);
     // Regex for adding "," after every 3 numbers
     d3.select("#covidDeath").text(Number(element["total_death"]).toLocaleString());
     d3.select("#totalPopulation").text(Number(element["poulation"]).toLocaleString());
@@ -114,7 +112,7 @@ function updateCountryTableProperty(data, nameOfCountry, year) {
 }
 
 // Load external data and boot
-Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function (loadData) {
+Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
   let topo = loadData[0]
   let csvData = loadData[1];
 
@@ -287,10 +285,17 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     }
   }
 
-  let groupForGlobe = svg.append("g");
+  let groupForGlobe = svg.append("g").attr("class", "test");
+
+  //Ocean
+  groupForGlobe.append("circle")
+  .attr("r",  scaleFactor)
+  .attr("cx", width/2)
+  .attr("cy", height/2 )
+  .attr('fill', 'lightskyblue')
 
   // Draw the map
-  groupForGlobe.append("g")
+  groupForGlobe
     .selectAll("path")
     .data(topo.features)
     .enter()
@@ -315,17 +320,6 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     .on("mousemove", mouseMove)
     .on("mouseleave", mouseLeave)
     .on("click", mouseClick)
-
-  // Append Ocean data
-  groupForGlobe.append("g")
-    .attr("id", "ocean")
-    .selectAll("path")
-    .data(loadData[2].features)
-    .enter()
-    .append("path")
-    .attr("d", d3.geoPath()
-      .projection(projection))
-    .style("fill", "lightskyblue");
 
   // For the first Year 2020 color fill update for country
   dataForHeatMap = normalizeIntensityScoreByYear(dataForHeatMap, currentYear, 0, 1);
