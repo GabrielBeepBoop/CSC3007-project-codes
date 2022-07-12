@@ -12,22 +12,31 @@
   <!-- CSS Bootstrap import -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+    integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+  <!--JS-->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://unpkg.com/d3-simple-slider"></script> <!-- Slider -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script> <!-- Legend -->
+  <script type="module" src="https://cdn.skypack.dev/d3-scale-chromatic@3"></script> <!-- Color -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script type="text/javascript" src="script/map.js"></script>
 
-  </head>
+</head>
 
 <body>
   <div class="container">
     <div class="row">
       <div class="col-lg-9">
-        <h4 class="text-center display-6">Covid Infographics</h4>
+        <h4 class="text-center display-6" style="padding-left: 10%">Covid-19 Infographics</h4>
         <svg id="worldMap"></svg>
       </div>
       <div class="col-lg-3">
-        <h5 class="text-center px-3 py-3" id="caseInfoText">Country info</h5>
+        <br>
+        <br>
+        <h5 class="text-center px-3 py-3" id="caseInfoText">Country Information</h5>
         <!--Insert scroller here-->
         <div id="slider-horizontal"></div>
-
 
         <table class="table small">
           <tbody>
@@ -36,16 +45,20 @@
               <td id="country"></td>
             </tr>
             <tr>
-              <td style="width:40%">Current Year</td>
+              <td style="width:40%">Year</td>
               <td id="year"></td>
             </tr>
             <tr>
-              <td style="width:40%">Covid Deaths</td>
+              <td style="width:40%">Covid-19 Deaths</td>
               <td id="covidDeath"></td>
             </tr>
             <tr>
               <td style="width:40%">Total Population</td>
               <td id="totalPopulation"></td>
+            </tr>
+            <tr>
+              <td style="width:40%">Population Density<br>(Per km²)</td>
+              <td id="populationDensity"></td>
             </tr>
             <tr>
               <td style="width:40%">Total Vaccinations</td>
@@ -63,32 +76,24 @@
   <br>
   <br>
   <hr>
-  <div class="text-center col-lg-9">
-  <h4 class="display-6" id="selectedCountryStats">Individual Country Statistics</h4>
-  <div class="btn-group btn-group-toggle" data-toggle="buttons">
-    <label class="btn btn-secondary">
-        <input type="radio" name="options" id="optionLineChart" autocomplete="off" checked> Line Chart
-    </label>
-    <label class="btn btn-secondary">
-        <input type="radio" name="options" id="optionPieChart" autocomplete="off"> Pie Chart
-    </label>
-    <label class="btn btn-secondary">
-        <input type="radio" name="options" id="optionNodeChart" autocomplete="off"> Node Chart
-    </label>
-</div>
+  <div class="text-center col-lg-12">
+    <h4 class="display-6" id="selectedCountryStats">Individual Country Statistics</h4>
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+      <input type="radio" class="btn-check" name="options" id="optionLineChart" autocomplete="off" checked>
+      <label class="btn btn-secondary" for="optionLineChart">Monthly Deaths</label>
+
+      <input type="radio" class="btn-check" name="options" id="optionPieChart" autocomplete="off">
+      <label class="btn btn-secondary" for="optionPieChart">Vaccination (Doses)</label>
+
+      <input type="radio" class="btn-check" name="options" id="optionNodeChart" autocomplete="off">
+      <label class="btn btn-secondary" for="optionNodeChart">Vaccination (Per 100 people)</label>
+    </div>
   </div>
+  <br>
   <!-- Charts -->
   <div class="container">
-    <svg id="countryChart" class="rectBackground"  viewBox="0 0 1200 520"></svg>
+    <svg id="countryChart" class="rectBackground" viewBox="0 0 1200 520"></svg>
   </div>
 </body>
-
-<!--JS-->
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://unpkg.com/d3-simple-slider"></script> <!-- Slider -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script> <!-- Legend -->
-<script type="module" src="https://cdn.skypack.dev/d3-scale-chromatic@3"></script> <!-- Color -->
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-<script type="text/javascript" src="script/map.js"></script>
 
 </html>
