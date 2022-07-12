@@ -80,29 +80,37 @@ function updateCountryTableProperty(data, nameOfCountry, year) {
   // Check if the country exists in the csv
   const found = data[year].some(el => el.location === nameOfCountry);
 
+  let element = undefined;
+
   if (found) {
     // Retrieve elemnt by country
-    let element = data[year].find(obj => {
+      element = data[year].find(obj => {
       return obj.location == nameOfCountry;
     })
 
+  }
+  if (nameOfCountry != null && currentCountry != "" && element != undefined){
     // Update statistics for that chosen country
     d3.select("#country").text(nameOfCountry);
     d3.select("#year").text(year);
+    console.log(element);
+    console.log(element["total_death"]);
     // Regex for adding "," after every 3 numbers
     d3.select("#covidDeath").text(Number(element["total_death"]).toLocaleString());
     d3.select("#totalPopulation").text(Number(element["poulation"]).toLocaleString());
     d3.select("#totalVaccination").text(Number(element["total_vaccinations"]).toLocaleString());
-  } else {
-    // Update statistics for that chosen country
-    d3.select("#country").text(nameOfCountry);
-    d3.select("#year").text(year);
-    // Regex for adding "," after every 3 numbers
-    d3.select("#covidDeath").text("NIL");
-    d3.select("#totalPopulation").text("NIL");
-    d3.select("#totalVaccination").text("NIL");
-  }
 
+  }
+  else {
+     // Update statistics for that chosen country
+     d3.select("#country").text("NIL");
+     d3.select("#year").text("NIL");
+     // Regex for adding "," after every 3 numbers
+     d3.select("#covidDeath").text("NIL");
+     d3.select("#totalPopulation").text("NIL");
+     d3.select("#totalVaccination").text("NIL");
+
+  }
 }
 
 // Load external data and boot
@@ -194,8 +202,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     tooltip
       .html("<strong>Country:</strong> <span >" + d.properties.name)
       .style('visibility', 'visible')
-    currentCountry = d.properties.name;
-    updateCountryTableProperty(dataForHeatMap, currentCountry, currentYear);
+
   }
 
   // When the mouse moves over the country
@@ -217,6 +224,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
       .style("stroke", "transparent")
     tooltip
       .style('visibility', 'hidden')
+      currentCountry = "";
   }
 
   let mouseClick = function (event, d) {
@@ -235,6 +243,10 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
         .style("stroke-width", "3px")
         .style("opacity", 1);
 
+      
+       currentCountry = d.properties.name;
+       updateCountryTableProperty(dataForHeatMap, d.properties.name, currentYear);
+        
       // Update Helper text
       d3.select("#HelperText")
         .text(currentCountry + " has been selected")
