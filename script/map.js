@@ -621,6 +621,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath), d3.json(oceanURL)]).then(function
     update(vaccinationData[0])
 
   }
+  // Node Chart
   function drawCountryNodeChart(selectedCountry) {
     let nodeData = []
     let obj = {}
@@ -772,26 +773,54 @@ svg.append("text")
       }
  
 }
+// Text to be displayed if country is undefined
+function drawCountryUndefined(){
+  let svg = d3.select("#countryChart")
+  
+  svg.append("text")
+  .attr('x',400)
+  .attr('y',250)
+  .text("Data does not exist for this country, please select another one")
+  .attr('alignment-baseline','middle')
+  .attr('text-anchor','start')
+  .attr('class',"NodeChartLegend")
+
+}
 
   // Obtain user selection and call function to change the fill of the circles and legend
   d3.select("#optionLineChart").on("click", function (d) {
     // Clear the chart before drawing
     clearChart();
-    drawCountryLineChart(currentCountry);
+    if (currentCountry != undefined){
+      drawCountryLineChart(currentCountry);
+    }
+    else{
+      drawCountryUndefined();
+    }
   })
   d3.select("#optionPieChart").on("click", function (d) {
     // Clear the chart before drawing
     clearChart();
-    drawCountryPieChart(currentCountry);
+    if (currentCountry != undefined){
+      drawCountryPieChart(currentCountry);
+    }
+    else{
+      drawCountryUndefined();
+    }
   })
   d3.select("#optionNodeChart").on("click", function (d) {
     // Clear the chart before drawing
     clearChart();
-    drawCountryNodeChart(currentCountry);
+    if (currentCountry != undefined){
+      drawCountryNodeChart(currentCountry);
+    }
+    else{
+      drawCountryUndefined();
+    }
   })
 
   // Disable charts 
-  if (currentCountry != "") {
+  if (currentCountry != "" || currentCountry == undefined ) {
     d3.select("#optionLineChart").property("disabled", true);
     d3.select("#optionLineChart").property("disabled", true);
     d3.select("#optionLineChart").property("disabled", true);
@@ -816,6 +845,8 @@ function clearChart(){
 function addComma(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+// Fun
 
 // Initalize the zoom
 initZoom();
