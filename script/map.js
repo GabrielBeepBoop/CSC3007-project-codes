@@ -469,150 +469,157 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
         countryData.push(csvData[i])
       }
     }
-    // Add up the total number of deaths for each month
-    for (var i = 0; i < countryData.length; i++) {
-      if (formatMonth(countryData[i]["date"]) == "January") {
-        totalJanDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "February") {
-        totalFebDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "March") {
-        totalMarDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "April") {
-        totalAprDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "May") {
-        totalMayDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "June") {
-        totalJunDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "July") {
-        totalJulDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "August") {
-        totalAugDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "September") {
-        totalSepDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "October") {
-        totalOctDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "November") {
-        totalNovDeaths += +countryData[i]["new_deaths"]
-      }
-      else if (formatMonth(countryData[i]["date"]) == "December") {
-        totalDecDeaths += +countryData[i]["new_deaths"]
-      }
-    }
 
-    // Map the total number of deaths to the respective month of the year
-    if (currentYear == "2020" || currentYear == "2021") {
-      deathData.push({ "date": currentYear + "-01", "deaths": totalJanDeaths })
-      deathData.push({ "date": currentYear + "-02", "deaths": totalFebDeaths })
-      deathData.push({ "date": currentYear + "-03", "deaths": totalMarDeaths })
-      deathData.push({ "date": currentYear + "-04", "deaths": totalAprDeaths })
-      deathData.push({ "date": currentYear + "-05", "deaths": totalMayDeaths })
-      deathData.push({ "date": currentYear + "-06", "deaths": totalJunDeaths })
-      deathData.push({ "date": currentYear + "-07", "deaths": totalJulDeaths })
-      deathData.push({ "date": currentYear + "-08", "deaths": totalAugDeaths })
-      deathData.push({ "date": currentYear + "-09", "deaths": totalSepDeaths })
-      deathData.push({ "date": currentYear + "-10", "deaths": totalOctDeaths })
-      deathData.push({ "date": currentYear + "-11", "deaths": totalNovDeaths })
-      deathData.push({ "date": currentYear + "-12", "deaths": totalDecDeaths })
-    }
-    else if (currentYear == "2022") {
-      deathData.push({ "date": currentYear + "-01", "deaths": totalJanDeaths })
-      deathData.push({ "date": currentYear + "-02", "deaths": totalFebDeaths })
-      deathData.push({ "date": currentYear + "-03", "deaths": totalMarDeaths })
-      deathData.push({ "date": currentYear + "-04", "deaths": totalAprDeaths })
-      deathData.push({ "date": currentYear + "-05", "deaths": totalMayDeaths })
-      deathData.push({ "date": currentYear + "-06", "deaths": totalJunDeaths })
-    }
+    // Show the chart if data is avaliable for the country
+    if (countryData.length != 0) {
+      // Add up the total number of deaths for each month
+      for (var i = 0; i < countryData.length; i++) {
+        if (formatMonth(countryData[i]["date"]) == "January") {
+          totalJanDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "February") {
+          totalFebDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "March") {
+          totalMarDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "April") {
+          totalAprDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "May") {
+          totalMayDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "June") {
+          totalJunDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "July") {
+          totalJulDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "August") {
+          totalAugDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "September") {
+          totalSepDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "October") {
+          totalOctDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "November") {
+          totalNovDeaths += +countryData[i]["new_deaths"]
+        }
+        else if (formatMonth(countryData[i]["date"]) == "December") {
+          totalDecDeaths += +countryData[i]["new_deaths"]
+        }
+      }
 
-    // Dimensions for the chart
-    let margin = { top: 20, right: 20, bottom: 50, left: 50 },
-      width = 1200 - margin.left - margin.right,
-      height = 500 - margin.top - margin.bottom;
+      // Map the total number of deaths to the respective month of the year
+      if (currentYear == "2020" || currentYear == "2021") {
+        deathData.push({ "date": currentYear + "-01", "deaths": totalJanDeaths })
+        deathData.push({ "date": currentYear + "-02", "deaths": totalFebDeaths })
+        deathData.push({ "date": currentYear + "-03", "deaths": totalMarDeaths })
+        deathData.push({ "date": currentYear + "-04", "deaths": totalAprDeaths })
+        deathData.push({ "date": currentYear + "-05", "deaths": totalMayDeaths })
+        deathData.push({ "date": currentYear + "-06", "deaths": totalJunDeaths })
+        deathData.push({ "date": currentYear + "-07", "deaths": totalJulDeaths })
+        deathData.push({ "date": currentYear + "-08", "deaths": totalAugDeaths })
+        deathData.push({ "date": currentYear + "-09", "deaths": totalSepDeaths })
+        deathData.push({ "date": currentYear + "-10", "deaths": totalOctDeaths })
+        deathData.push({ "date": currentYear + "-11", "deaths": totalNovDeaths })
+        deathData.push({ "date": currentYear + "-12", "deaths": totalDecDeaths })
+      }
+      else if (currentYear == "2022") {
+        deathData.push({ "date": currentYear + "-01", "deaths": totalJanDeaths })
+        deathData.push({ "date": currentYear + "-02", "deaths": totalFebDeaths })
+        deathData.push({ "date": currentYear + "-03", "deaths": totalMarDeaths })
+        deathData.push({ "date": currentYear + "-04", "deaths": totalAprDeaths })
+        deathData.push({ "date": currentYear + "-05", "deaths": totalMayDeaths })
+        deathData.push({ "date": currentYear + "-06", "deaths": totalJunDeaths })
+      }
 
-    // Add the chart
-    let countryChart = d3.select("#countryChart")
-      .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+      // Dimensions for the chart
+      let margin = { top: 20, right: 20, bottom: 50, left: 50 },
+        width = 1200 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
 
-    // Set ranges
-    var x = d3.scaleTime().range([0, width]);
-    var y = d3.scaleLinear().range([height, 0]);
+      // Add the chart
+      let svgForCountryChart = d3.select("#countryChart")
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
-    // Define line
-    var line = d3.line()
-      .x(function (d) { return x(d.date); })
-      .y(function (d) { return y(d.deaths); })
+      // Set ranges
+      var x = d3.scaleTime().range([0, width]);
+      var y = d3.scaleLinear().range([height, 0]);
 
-    // Append tooltip
-    var div = d3.select("body").append("div")
-      .attr("class", "tooltip")
-      .style('visibility', 'visible')
+      // Define line
+      var line = d3.line()
+        .x(function (d) { return x(d.date); })
+        .y(function (d) { return y(d.deaths); })
 
-    // Format the data
-    deathData.forEach(function (d) {
-      d.date = parseDate(d.date);
-      d.deaths = +d.deaths;
-    });
+      // Append tooltip
+      var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style('visibility', 'visible')
 
-    // Scale the range of the data
-    x.domain(d3.extent(deathData, function (d) { return d.date; }));
-    y.domain([0, d3.max(deathData, function (d) { return d.deaths; })]);
-
-    // Format x-axis to only show the names of each month
-    var xAxis = d3.axisBottom(x)
-      .tickFormat(d3.timeFormat("%B"));
-
-    // Add the path.
-    countryChart.append("path")
-      .data([deathData])
-      .attr("class", "line")
-      .attr("d", line);
-
-    // Add x-axis for year chart
-    countryChart.append("g")
-      .attr("class", "axis axis-x")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis)
-      .selectAll("text")
-      .attr("transform", "rotate(-45)")
-      .style("text-anchor", "end");
-    // Add y-axis for year chart
-    countryChart.append("g")
-      .attr("class", "axis axis-y")
-      .call(d3.axisLeft(y).ticks(10))
-
-    // Add dots with tooltips
-    countryChart.selectAll("dot")
-      .data(deathData)
-      .enter().append("circle")
-      .attr("r", 5)
-      .attr("cx", function (d) { return x(d.date); })
-      .attr("cy", function (d) { return y(d.deaths); })
-      .on("mouseover", function (event, d) {
-        div.transition()
-          .duration(200)
-          .style('visibility', 'visible');
-        div.html("Month: " + formatMonth(d.date) + "<br/>Deaths: " + d.deaths)
-      })
-      .on('mousemove', function(event, d) {
-        div
-          .style("left", (event.pageX) + "px")
-          .style("top", (event.pageY - 28) + "px");
-    })
-      .on("mouseout", function (d) {
-        div.transition()
-          .duration(500)
-          .style('visibility', 'hidden')
+      // Format the data
+      deathData.forEach(function (d) {
+        d.date = parseDate(d.date);
+        d.deaths = +d.deaths;
       });
+
+      // Scale the range of the data
+      x.domain(d3.extent(deathData, function (d) { return d.date; }));
+      y.domain([0, d3.max(deathData, function (d) { return d.deaths; })]);
+
+      // Format x-axis to only show the names of each month
+      var xAxis = d3.axisBottom(x)
+        .tickFormat(d3.timeFormat("%B"));
+
+      // Add the path.
+      svgForCountryChart.append("path")
+        .data([deathData])
+        .attr("class", "line")
+        .attr("d", line);
+
+      // Add x-axis for year chart
+      svgForCountryChart.append("g")
+        .attr("class", "axis axis-x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end");
+      // Add y-axis for year chart
+      svgForCountryChart.append("g")
+        .attr("class", "axis axis-y")
+        .call(d3.axisLeft(y).ticks(10))
+
+      // Add dots with tooltips
+      svgForCountryChart.selectAll("dot")
+        .data(deathData)
+        .enter().append("circle")
+        .attr("r", 5)
+        .attr("cx", function (d) { return x(d.date); })
+        .attr("cy", function (d) { return y(d.deaths); })
+        .on("mouseover", function (event, d) {
+          div.transition()
+            .duration(200)
+            .style('visibility', 'visible');
+          div.html("Month: " + formatMonth(d.date) + "<br/>Deaths: " + d.deaths)
+        })
+        .on('mousemove', function(event, d) {
+          div
+            .style("left", (event.pageX) + "px")
+            .style("top", (event.pageY - 28) + "px");
+      })
+        .on("mouseout", function (d) {
+          div.transition()
+            .duration(500)
+            .style('visibility', 'hidden')
+        });
+      }
+      else {
+        drawCountryUndefined()
+      }
   }
 
   //Function to draw country pie chart to visualize number of vaccinations
@@ -645,106 +652,109 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
         countryData.push(csvData[i])
       }
     }
-    console.log(countryData)
+    // Show the chart if data is avaliable for the country
+    if (countryData.length != 0) {
+      // Map vaccination data based on vaccination status of the population
+      for (var i = 0; i < countryData.length; i++) {
+        vaccinated = countryData[i]["people_vaccinated"]
+        vaccinatedFull = countryData[i]["people_fully_vaccinated"]
+        vaccinatedBoost = countryData[i]["total_boosters"]
+        population = countryData[i]["population"]
+        percentBoost = ((+vaccinatedBoost / +population) * 100)
+        percentFull = ((+vaccinatedFull / +population) * 100) - percentBoost
+        percentSingle = ((+vaccinated / +population) * 100) - ((+vaccinatedFull / +population) * 100)
+        percentNone = (((+population - +vaccinated) / +population) * 100)
+        vaccinationData.push({ "Unvaccinated": percentNone, "Vaccinated (1 dose)": percentSingle, "Vaccinated (2 doses)": percentFull, "Vaccinated (Boosted)": percentBoost })
+      }
 
-    // Map vaccination data based on vaccination status of the population
-    for (var i = 0; i < countryData.length; i++) {
-      vaccinated = countryData[i]["people_vaccinated"]
-      vaccinatedFull = countryData[i]["people_fully_vaccinated"]
-      vaccinatedBoost = countryData[i]["total_boosters"]
-      population = countryData[i]["population"]
-      percentBoost = ((+vaccinatedBoost / +population) * 100)
-      percentFull = ((+vaccinatedFull / +population) * 100) - percentBoost
-      percentSingle = ((+vaccinated / +population) * 100) - ((+vaccinatedFull / +population) * 100)
-      percentNone = (((+population - +vaccinated) / +population) * 100)
-      vaccinationData.push({ "Unvaccinated": percentNone, "Vaccinated (1 dose)": percentSingle, "Vaccinated (2 doses)": percentFull, "Vaccinated (Boosted)": percentBoost })
+      // Dimensions for the chart
+      let margin = { top: 20, right: 20, bottom: 20, left: 10 },
+        width = 1200 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+      // Set radius of the pie chart
+      const radius = Math.min(width, height) / 2 - margin.top;
+
+      // Define the domain and colors for use with color scale and legend
+      let vaccinatedDomain = new Map([["Unvaccinated", "lightcoral"], ["Vaccinated (1 dose)", "palegoldenrod"], ["Vaccinated (2 doses)", "lightgreen"], ["Vaccinated (Boosted)", "lightskyblue"]])
+
+      // Define color scale
+      var vaccinatedScale = d3.scaleThreshold()
+        .domain(vaccinatedDomain.keys())
+        .range(vaccinatedDomain.values())
+
+      // Define legend
+      var legend = d3.legendColor()
+        .labels(vaccinatedDomain.keys())
+        .scale(vaccinatedScale)
+        .title("Vaccination status as of " + selectedDate)
+        .shape("path", d3.symbol().type(d3.symbolCircle).size(150)())
+
+      // Append the svg object to the div
+      let svgForCountryChart = d3.select("#countryChart")
+        .append("g")
+        .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+      // Function to create or update the pie chart
+      function update(data) {
+
+        // Compute position of each group on the pie
+        const pie = d3.pie()
+          .value(function (d) { return d[1]; })
+          .sort(function (a, b) { return d3.ascending(a.key, b.key); })
+        const data_ready = pie(Object.entries(data))
+
+        // Shape helper to build arcs
+        const arcGenerator = d3.arc()
+          .innerRadius(0)
+          .outerRadius(radius)
+
+        // Add legend to the svg
+        svgForCountryChart.
+        append("g")
+        .attr("class", "PieChartLegend")
+        .attr("transform", "translate(-500,-180)")
+        .style("font-size", "15px")
+        .style("fill", "black")
+        .call(legend)
+
+        // Append tooltip
+        var div = d3.select("body").append("div")
+          .attr("class", "tooltip")
+          .style('visibility', 'visible')
+
+        // Build the pie chart
+        svgForCountryChart
+          .selectAll('vaccinationChart')
+          .data(data_ready)
+          .join('path')
+          .attr('d', arcGenerator)
+          .attr('fill', function (d) { return vaccinatedDomain.get(d.data[0]) })
+          .attr("stroke", "white")
+          .style("stroke-width", "2px")
+          .style("opacity", 1)
+          .on("mouseover", function (event, d) {
+            div.transition()
+              .duration(200)
+              .style('visibility', 'visible')
+            div.html(d.data[0] + ": " + Math.round(d.data[1]) + "%")
+          })
+          .on("mousemove", function (event, d) {
+            div
+              .style("left", (event.pageX) + "px")
+              .style("top", (event.pageY - 28) + "px");
+          })
+          .on("mouseout", function (d) {
+            div.transition()
+              .duration(500)
+              .style('visibility', 'hidden')
+          });
+      }
+      update(vaccinationData[0])
     }
-
-    // Dimensions for the chart
-    let margin = { top: 20, right: 20, bottom: 20, left: 10 },
-      width = 1200 - margin.left - margin.right,
-      height = 500 - margin.top - margin.bottom;
-
-    // Set radius of the pie chart
-    const radius = Math.min(width, height) / 2 - margin.top;
-
-    // Define the domain and colors for use with color scale and legend
-    let vaccinatedDomain = new Map([["Unvaccinated", "lightcoral"], ["Vaccinated (1 dose)", "palegoldenrod"], ["Vaccinated (2 doses)", "lightgreen"], ["Vaccinated (Boosted)", "lightskyblue"]])
-
-    // Define color scale
-    var vaccinatedScale = d3.scaleThreshold()
-      .domain(vaccinatedDomain.keys())
-      .range(vaccinatedDomain.values())
-
-    // Define legend
-    var legend = d3.legendColor()
-      .labels(vaccinatedDomain.keys())
-      .scale(vaccinatedScale)
-      .title("Vaccination status as of " + selectedDate)
-      .shape("path", d3.symbol().type(d3.symbolCircle).size(150)())
-
-    // Append the svg object to the div
-    svgForCountryChart = d3.select("#countryChart")
-      .append("svg")
-      .append("g")
-      .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
-    // Function to create or update the pie chart
-    function update(data) {
-
-      // Compute position of each group on the pie
-      const pie = d3.pie()
-        .value(function (d) { return d[1]; })
-        .sort(function (a, b) { return d3.ascending(a.key, b.key); })
-      const data_ready = pie(Object.entries(data))
-
-      // Shape helper to build arcs
-      const arcGenerator = d3.arc()
-        .innerRadius(0)
-        .outerRadius(radius)
-
-      // Append tooltip
-      var div = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style('visibility', 'visible')
-
-      // Build the pie chart
-      svgForCountryChart
-        .selectAll('vaccinationChart')
-        .data(data_ready)
-        .join('path')
-        .attr('d', arcGenerator)
-        .attr('fill', function (d) { return vaccinatedDomain.get(d.data[0]) })
-        .attr("stroke", "white")
-        .style("stroke-width", "2px")
-        .style("opacity", 1)
-        .on("mouseover", function (event, d) {
-          div.transition()
-            .duration(200)
-            .style('visibility', 'visible')
-          div.html(d.data[0] + ": " + Math.round(d.data[1]) + "%")
-        })
-        .on("mousemove", function (event, d) {
-          div
-            .style("left", (event.pageX) + "px")
-            .style("top", (event.pageY - 28) + "px");
-        })
-        .on("mouseout", function (d) {
-          div.transition()
-            .duration(500)
-            .style('visibility', 'hidden')
-        });
+    else {
+      drawCountryUndefined()
     }
-    update(vaccinationData[0])
-    
-    //Add legend to the svg
-    svgForCountryChart.
-    append("g")
-    .attr("class", "PieChartLegend")
-    .attr("transform", "translate(-500,-180)")
-    .style("font-size", "15px")
-    .style("fill", "black")
-    .call(legend)
   }
 
   //Function to draw country node chart to visualize number of vaccinations per 100 people
@@ -773,124 +783,130 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       }
     }
 
-    // Take the last value from the array
-    nodeData = nodeData[nodeData.length - 1];
+    // Show the chart if data is avaliable for the country
+    if (nodeData.length != 0) {
+      // Take the last value from the array
+      nodeData = nodeData[nodeData.length - 1];
 
-    // Scale values and convert to Integer
-    var populationDensity = +nodeData['population_density'];
-    var population = +nodeData['population'];
-    var vacPeople = Math.ceil(+nodeData['people_vaccinated'] / population * 100);
-    var unvacPeople = 100 - vacPeople
+      // Scale values and convert to Integer
+      var populationDensity = +nodeData['population_density'];
+      var population = +nodeData['population'];
+      var vacPeople = Math.ceil(+nodeData['people_vaccinated'] / population * 100);
+      var unvacPeople = 100 - vacPeople
 
-    let data = [];
+      let data = [];
 
-    // Add Vaccinated to obj
-    for (let i = 0; i < vacPeople; i++) {
-      obj = { "id": i, "status": "Vaccinated" };
-      data.push(obj);
-    } // Add Unvaccinated to obj
-    for (let i = vacPeople; i < (vacPeople + unvacPeople); i++) {
-      obj = { "id": i, "status": "Unvaccinated" };
-      data.push(obj);
+      // Add Vaccinated to obj
+      for (let i = 0; i < vacPeople; i++) {
+        obj = { "id": i, "status": "Vaccinated" };
+        data.push(obj);
+      } // Add Unvaccinated to obj
+      for (let i = vacPeople; i < (vacPeople + unvacPeople); i++) {
+        obj = { "id": i, "status": "Unvaccinated" };
+        data.push(obj);
+      }
+
+      // Dimensions for the chart
+      let margin = { top: 45, right: 20, bottom: 25, left: 10 },
+      width = 1200 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+      let simulation = d3.forceSimulation(data)
+        // Higher Density = More Compact
+        .force("charge", d3.forceManyBody().strength(-populationDensity))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("x", d3.forceX()
+          .strength(0.1)
+        )
+        .force("y", d3.forceY()
+          .y(height / 2)
+          .strength(0.1)
+        )
+        .on("tick", tick);
+
+      function tick() {
+        circle
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y);
+      }
+    
+      let svgForCountryChart = d3.select("#countryChart")
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+      let nodes = svgForCountryChart.append("g").attr("id", "nodes")
+        .selectAll("g")
+        .data(data)
+        .enter()
+        .append("g");
+
+      let circle = nodes.append("circle")
+        .attr("class", "node")
+        .attr("r", 15)
+        .attr("fill", d => {
+          if (d.status == "Vaccinated") {
+            return "Green";
+          } else {
+            return "Red";
+          }
+        })
+        .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended));
+
+      // Define the domain and colors for use with color scale and legend
+      let vaccinatedDomain = new Map([["Unvaccinated", "Red"], ["Vaccinated (at least 1 dose)", "Green"]])
+
+      // Define color scale
+      var vaccinatedScale = d3.scaleThreshold()
+        .domain(vaccinatedDomain.keys())
+        .range(vaccinatedDomain.values())
+
+      // Define legend
+      var legend = d3.legendColor()
+        .labels(vaccinatedDomain.keys())
+        .scale(vaccinatedScale)
+        .title("Vaccination status as of " + selectedDate)
+        .shape("path", d3.symbol().type(d3.symbolCircle).size(150)())
+
+      // Add legend to the svg
+      svgForCountryChart.
+        append("g")
+        .attr("class", "NodeChartLegend")
+        .attr("transform", "translate(75,5)")
+        .style("font-size", "15px")
+        .style("fill", "black")
+        .call(legend)
+
+      //Function for Dragging the nodes
+      function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+
+      function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+      }
+
+      function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      }
     }
-
-    // Dimensions for the chart
-    let margin = { top: 45, right: 20, bottom: 25, left: 10 },
-    width = 1200 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-    let simulation = d3.forceSimulation(data)
-      // Higher Density = More Compact
-      .force("charge", d3.forceManyBody().strength(-populationDensity))
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("x", d3.forceX()
-        .strength(0.1)
-      )
-      .force("y", d3.forceY()
-        .y(height / 2)
-        .strength(0.1)
-      )
-      .on("tick", tick);
-
-    function tick() {
-      circle
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y);
-    }
-  
-    let svg = d3.select("#countryChart")
-      .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-
-    let nodes = svg.append("g").attr("id", "nodes")
-      .selectAll("g")
-      .data(data)
-      .enter()
-      .append("g");
-
-    let circle = nodes.append("circle")
-      .attr("class", "node")
-      .attr("r", 15)
-      .attr("fill", d => {
-        if (d.status == "Vaccinated") {
-          return "Green";
-        } else {
-          return "Red";
-        }
-      })
-      .call(d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended));
-
-    // Define the domain and colors for use with color scale and legend
-    let vaccinatedDomain = new Map([["Unvaccinated", "Red"], ["Vaccinated (at least 1 dose)", "Green"]])
-
-    // Define color scale
-    var vaccinatedScale = d3.scaleThreshold()
-      .domain(vaccinatedDomain.keys())
-      .range(vaccinatedDomain.values())
-
-    // Define legend
-    var legend = d3.legendColor()
-      .labels(vaccinatedDomain.keys())
-      .scale(vaccinatedScale)
-      .title("Vaccination status as of " + selectedDate)
-      .shape("path", d3.symbol().type(d3.symbolCircle).size(150)())
-
-    // Add legend to the svg
-    svg.
-      append("g")
-      .attr("class", "NodeChartLegend")
-      .attr("transform", "translate(75,5)")
-      .style("font-size", "15px")
-      .style("fill", "black")
-      .call(legend)
-
-    //Function for Dragging the nodes
-    function dragstarted(event, d) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    }
-
-    function dragged(event, d) {
-      d.fx = event.x;
-      d.fy = event.y;
-    }
-
-    function dragended(event, d) {
-      if (!event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
+    else {
+      drawCountryUndefined()
     }
   }
 
   // Text to be displayed if country is not selected
     function drawCountryNotSelected() {
-      let svg = d3.select("#countryChart")
+      let svgForCountryChart = d3.select("#countryChart")
   
-      svg.append("text")
+      svgForCountryChart.append("text")
         .attr('x', 370)
         .attr('y', 250)
         .text("No country is selected, please select one from the globe to view")
@@ -902,9 +918,9 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
 
   // Text to be displayed if country is undefined
   function drawCountryUndefined() {
-    let svg = d3.select("#countryChart")
+    let svgForCountryChart = d3.select("#countryChart")
 
-    svg.append("text")
+    svgForCountryChart.append("text")
       .attr('x', 400)
       .attr('y', 250)
       .text("Data does not exist for this country, please select another one")
