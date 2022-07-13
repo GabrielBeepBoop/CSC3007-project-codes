@@ -56,7 +56,7 @@ function updateHeatMapByYear(val, data) {
   let objectByYear = data[val];
   for (const index in objectByYear) {
     let element = objectByYear[index];
-    d3.select("path#" + element["location"]).attr("fill", d3.interpolateTurbo(element["intensity_score"]));
+    d3.select("path#" + element["location"]).attr("fill", d3.interpolateYlOrBr(element["intensity_score"]));
   }
 }
 // Normalize the intensity score for a Year for each country between a given range from normalizedMin to normalizedMax (e.g 0 to 100)
@@ -315,7 +315,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       .projection(projection)
     )
     // set the color of each country
-    .attr("fill", d3.interpolateTurbo(0))
+    .attr("fill", d3.interpolateYlOrBr(0))
 
     // Set the ID to the name of each country 
     .attr("id", function (d) {
@@ -381,7 +381,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
   var data = [];
 
   for (var i = 0; i <= 10; i++) {
-    data.push({ "color": d3.interpolateTurbo(parseFloat(i) / 10), "value": parseFloat(i) / 10 });
+    data.push({ "color": d3.interpolateYlOrBr(parseFloat(i) / 10), "value": parseFloat(i) / 10 });
   }
   const rangeMultiplier = 100;
 
