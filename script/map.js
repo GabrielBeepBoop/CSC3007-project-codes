@@ -352,15 +352,30 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       dataForHeatMap = normalizeIntensityScoreByYear(dataForHeatMap, val, 0, 1);
       updateHeatMapByYear(val, dataForHeatMap);
       updateCountryTableProperty(dataForHeatMap, currentCountry, currentYear);
+
+        // Clear any existing charts and draw the selected chart
+        clearChart()
+        if ($('#optionLineChart').is(':checked')) {
+          drawCountryLineChart(currentCountry, currentYear)
+        }
+        else if ($('#optionPieChart').is(':checked')) {
+          drawCountryPieChart(currentCountry, currentYear)
+        }
+        else if ($('#optionNodeChart').is(':checked')) {
+          drawCountryNodeChart(currentCountry, currentYear)
+        }
     });
 
+    d3.select("body").append("div")
+    .attr("id", "slider-horizontal");
+    
   var gHorizontal = d3
     .select('div#slider-horizontal')
     .append('svg')
     .attr('width', 300)
     .attr('height', 100)
     .append('g')
-    .attr('transform', 'translate(80, 30)');
+    .attr('transform', 'translate(100, 60)');
 
   gHorizontal.call(sliderHorizontal);
 
