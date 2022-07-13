@@ -31,7 +31,7 @@ svg.call(d3.drag().on('drag', (event) => {
     rotate[1] - event.dy * k
   ])
   globePaths = d3.geoPath().projection(projection)
-  svg.selectAll("path").attr("d", globePaths)
+  svg.select(".globe").selectAll("path").attr("d", globePaths)
 }));
 
 
@@ -297,7 +297,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     }
   }
 
-  let groupForGlobe = svg.append("g").attr("class", "test");
+  let groupForGlobe = svg.append("g").attr("class", "globe");
 
   //Ocean
   groupForGlobe.append("circle")
@@ -684,7 +684,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
       .shape("path", d3.symbol().type(d3.symbolCircle).size(150)())
 
     // Append the svg object to the div
-    svg = d3.select("#countryChart")
+    svgForCountryChart = d3.select("#countryChart")
       .append("svg")
       .append("g")
       .attr("transform", `translate(${width / 2}, ${height / 2})`);
@@ -709,7 +709,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
         .style('visibility', 'visible')
 
       // Build the pie chart
-      svg
+      svgForCountryChart
         .selectAll('vaccinationChart')
         .data(data_ready)
         .join('path')
@@ -737,8 +737,8 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     }
     update(vaccinationData[0])
     
-    // Add legend to the svg
-    svg.
+    //Add legend to the svg
+    svgForCountryChart.
     append("g")
     .attr("class", "PieChartLegend")
     .attr("transform", "translate(-500,-180)")
@@ -919,7 +919,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     clearChart();
     // Only show chart if country is not blank or undefined
     if (currentCountry == "") {
-      drawCountryNotSeleccted();
+      drawCountryNotSelected();
     }
     else if (currentCountry == undefined) {
       drawCountryUndefined();
@@ -933,7 +933,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
     clearChart();
     // Only show chart if country is not blank or undefined
     if (currentCountry == "") {
-      drawCountryNotSeleccted();
+      drawCountryNotSelected();
     }
     else if (currentCountry == undefined) {
       drawCountryUndefined();
