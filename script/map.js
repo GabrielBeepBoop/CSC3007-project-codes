@@ -97,7 +97,6 @@ function updateCountryTableProperty(data, nameOfCountry, year) {
     d3.select("#covidDeath").text(Number(element["total_death"]).toLocaleString());
     d3.select("#totalPopulation").text(Number(element["poulation"]).toLocaleString());
     d3.select("#populationDensity").text(Number(element["population_density"]).toLocaleString());
-    d3.select("#totalVaccination").text(Number(element["total_vaccinations"]).toLocaleString());
 
   }
   else {
@@ -108,7 +107,6 @@ function updateCountryTableProperty(data, nameOfCountry, year) {
      d3.select("#covidDeath").text("NIL");
      d3.select("#totalPopulation").text("NIL");
      d3.select("#populationDensity").text("NIL");
-     d3.select("#totalVaccination").text("NIL");
 
   }
 }
@@ -158,19 +156,19 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
           intensityScore = 0;
         }
 
-        // Insert location, intensity score, total deaths, population, total vaccinations into the dataForHeatMap
+        // Insert location, intensity score, total deaths, population into the dataForHeatMap
         dataForHeatMap[year].push({
           "location": element["location"], "intensity_score": intensityScore, "poulation": element["population"],
-          "population_density": element["population_density"], "total_death": element["total_deaths"],
-          "total_vaccinations": element["total_vaccinations"]
+          "population_density": element["population_density"], "total_death": element["total_deaths"]
+     
         });
 
       } else {
 
-        // Insert location, intensity score, total deaths, population, total vaccinations into the dataForHeatMap
+        // Insert location, intensity score, total deaths, population into the dataForHeatMap
         dataForHeatMap[year].push({
           "location": element["location"], "intensity_score": 0,
-          "poulation": 0, "total_death": 0, "total_vaccinations": 0
+          "poulation": 0, "total_death": 0
         }
         );
       }
