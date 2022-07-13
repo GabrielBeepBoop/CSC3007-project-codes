@@ -772,6 +772,7 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
 
   //Function to draw country node chart to visualize number of vaccinations per 100 people
   function drawCountryNodeChart(selectedCountry, currentYear) {
+    var bounds = 10
     let nodeData = []
     let obj = {}
 
@@ -839,8 +840,8 @@ Promise.all([d3.json(GeoURL), d3.csv(csvPath)]).then(function (loadData) {
 
       function tick() {
         circle
-          .attr("cx", d => d.x)
-          .attr("cy", d => d.y);
+          .attr("cx", d => Math.max(bounds, Math.min(width - bounds, d.x)))
+          .attr("cy", d => Math.max(bounds, Math.min(height - bounds, d.y)));
       }
     
       let svgForCountryChart = d3.select("#countryChart")
